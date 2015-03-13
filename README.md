@@ -1,6 +1,6 @@
 # python_courses
 
-All projects presented here are from Rice University online courses.
+All projects presented here are from [Rice University online courses](https://www.coursera.org/specialization/fundamentalscomputing2/37).
 
 ## An Introduction to Interactive Programming in Python (Part 1)
 - Mini-Project 1 Rock-paper-scissors-lizard-Spock
