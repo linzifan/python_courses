@@ -1,6 +1,6 @@
 ---
 title: "IPP-Project 1"
-author: ""
+author: "Zifan Lin"
 date: ""
 output: html_document
 ---
