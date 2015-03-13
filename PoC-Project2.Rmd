@@ -55,6 +55,8 @@ If you have done this correctly, a single call to the `move` method should slide
 Note that you have not written any logic at this point to determine whether the user has "won" or "lost" the game. This is not required for this assignment, but you can think about how to do so and add it if you would like.
 
 ### Submission
+
+[Owltest page](http://codeskulptor.appspot.com/owltest/?urlTests=poc.poc_2048_tests.py&urlPylintConfig=poc.pylint_config.py&imports=%7Bpoc:(poc_2048_gui)%7D)
 ```{r test-python, eval=FALSE, engine='python'}
 """
 Clone of 2048 game.
