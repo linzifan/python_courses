@@ -4,8 +4,8 @@ All projects presented here are from [Rice University online courses](https://ww
 
 #### An Introduction to Interactive Programming in Python (Part 1)
 - Mini-Project 1 [Rock-paper-scissors-lizard-Spock](http://linzifan.github.io/python_courses/IPP-Project1)
-- Mini-Project 2 "Guess the number" game
-- Mini-Project 3 Stopwatch: The Game
+- Mini-Project 2 ["Guess the number" game](http://linzifan.github.io/python_courses/IPP-Project2)
+- Mini-Project 3 [Stopwatch: The Game](http://linzifan.github.io/python_courses/IPP-Project3)
 - Mini-Project 4 Pong
 
 #### An Introduction to Interactive Programming in Python (Part 2)
