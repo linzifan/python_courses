@@ -1,0 +1,160 @@
+---
+title: "PoC-Project 4"
+author: "Zifan Lin"
+date: ""
+output: html_document
+---
+
+## Yahtzee
+
+### Overview
+
+[Yahtzee](http://en.wikipedia.org/wiki/Yahtzee) is a dice game played with 5 dice where you try to score the most points by matching certain combinations. You can play the game [here](http://www.yahtzee-game.com). In Yahtzee, you get to roll the dice three times on each turn. After the first roll, you may hold as many dice as you would like and roll the remaining free dice. After this second roll, you may again hold as many dice as you would like and roll the rest. Once you stop (either because you have exhausted your three rolls or you are satisfied with the dice you have), you score the dice in one box on the score card.
+
+For this mini-project, we will implement a strategy function designed to help you choose which dice to hold after your **second** roll. This function will consider all possible choices of dice to hold and recommend the choice that maximizes the expected value of your score after the final roll.
+
+To simplify the mini-project, we will only consider scores corresponding to the "upper" section of the scorecard. Boxes in the upper section correspond to numbers on the dice. After each turn, you may choose one empty box and enter the sum of the dice you have with the corresponding number. For example, if you rolled (2,3,3,3,4), you could score 2 in the Twos box, 9 in the Threes box, or 4 in the Fours box. (Restricting scoring to the upper section will also allow you to debug/test your strategy function on smaller numbers of dice.)
+
+
+### Implementation
+
+Your task is to implement the following four functions: `score`, `expected_value`, `gen_all_holds`, and `strategy`. These four functions should do the following:
+
+- `score(hand)`: This function takes as input a tuple `hand` that represents the die values in the given Yahtzee hand. Since ordering of the die values in Yahtzee hands is unimportant, tuples corresponding to Yahtzee hands will always be stored in sorted order to guarantee that each tuple corresponds to a unique Yahtzee hand. The function `score(hand)` computes a score for `hand` as the maximum of the possible values for each choice of box in the upper section of the Yahtzee scorecard.
+- `expected_value(held_dice, num_die_sides, num_free_dice)`: This function computes the expected value of the scores for the possible Yahtzee hands that result from holding some dice and rolling the remaining free dice. The dice being held are specified by the sorted tuple `held_dice`. The number of sides and the number of dice that are free to be rolled are specified by `num_die_sides` and `num_free_dice`, respectively. You should use `gen_all_sequences` to compute all possible rolls for the dice being rolled. As an example, in a standard Yahtzee game using five dice, the length of `held_dice` plus `num_free_dice` should always be five.
+- `gen_all_holds(hand)`: This function takes a sorted tuple `hand` and returns the set of all possible sorted tuples formed by discarding a subset of the entries in `hand`. The entries in each of these tuples correspond to the dice that will be held. If the tuple `hand` has the entries $(h_0,h_1,...,h_{m-1})$, the returned tuples should have the form $(h_{i_0},h_{i_1},...,h_{i_{k-1}})$ where $0\leq k\leq m$ and the integer indices satisfy $0\leq i_0 < i_1 < ... < i_{k-1} < m$. In the case where values in the tuple `hand` happen to be distinct, the set of tuples returned by `gen_all_holds` will correspond to all possible subsets of `hand`.
+- `strategy(hand, num_die_sides)`: Thus function takes a sorted tuple `hand` and computes which dice to hold to maximize the expected value of the score of the possible hands that result from rolling the remaining free dice (with the specified number of sides). The function should return a tuple consisting of this maximal expected value and the choice of dice (specified as a sorted tuple) that should be held to achieve this value. If there are several holds that generate the maximal expected value, you may return any of these holds.
+
+As you implement these four functions, make sure that you think about the best order to write and test them in. You may add extra helper functions if so desired. However, the signature of the four functions above must match the provided description as they will be tested by the machine grader.
+
+### Coding `gen_all_holds`
+
+Implementing `gen_all_holds` is one of the main challenges of this mini-project. While its implementation is short, the actual code requires thought. Since tuples are immutable, your algorithm for computing the required set of tuples cannot directly delete from the tuple `hand`. Instead, `gen_all_holds` should compute the set of all possible holds in a manner very similar to that of `gen_all_sequences`. In particular, your implementation should iterate over the entries of `hand` and compute all possible holds for the first $k$ entries in `hand` using all possible holds for the first $k-1$ entries of `hand`.
+
+To help you test your implementation of `gen_all_holds`, you may make use of this short test suite:
+```
+import poc_holds_testsuite
+poc_holds_testsuite.run_suite(gen_all_holds)
+```
+Once you have working code, you may wish to extend the `score` function to include scores from the lower section of the Yahtzee scorecard. (This is optional and isn't graded.) With this extension, the `strategy` function gives quite accurate recommendations. Impress your friends by consistently beating them at Yahtzee!
+
+### Submission
+
+[Owltest page](http://codeskulptor.appspot.com/owltest/?urlTests=poc.poc_2048_merge_tests.py&urlPylintConfig=poc.pylint_config.py)
+
+```{r test-python, eval=FALSE, engine='python'}
+"""
+Planner for Yahtzee
+Simplifications:  only allow discard and roll, only score against upper level
+"""
+
+# Used to increase the timeout, if necessary
+import codeskulptor
+codeskulptor.set_timeout(20)
+
+def gen_all_sequences(outcomes, length):
+    """
+    Iterative function that enumerates the set of all sequences of
+    outcomes of given length.
+    """    
+    answer_set = set([()])
+    for dummy_idx in range(length):
+        temp_set = set()
+        for partial_sequence in answer_set:
+            for item in outcomes:
+                new_sequence = list(partial_sequence)
+                new_sequence.append(item)
+                temp_set.add(tuple(new_sequence))
+        answer_set = temp_set
+    return answer_set
+
+
+def score(hand):
+    """
+    Compute the maximal score for a Yahtzee hand according to the
+    upper section of the Yahtzee score card.
+
+    hand: full yahtzee hand
+
+    Returns an integer score 
+    """
+    if not hand:
+        return 0
+    six_scores = []
+    for item in hand:
+        six_scores.append(hand.count(item)*item)
+    return max(six_scores)
+
+
+def expected_value(held_dice, num_die_sides, num_free_dice):
+    """
+    Compute the expected value based on held_dice given that there
+    are num_free_dice to be rolled, each with num_die_sides.
+
+    held_dice: dice that you will hold
+    num_die_sides: number of sides on each die
+    num_free_dice: number of dice to be rolled
+
+    Returns a floating point expected value
+    """
+    die = [num for num in range(1, num_die_sides + 1)]
+    possible_seq = gen_all_sequences(die, num_free_dice)
+    scores = []
+    for item in possible_seq:
+        scores.append(score(held_dice + item))
+    return float(sum(scores)) / float(len(scores))
+
+
+def gen_all_holds(hand):
+    """
+    Generate all possible choices of dice from hand to hold.
+
+    hand: full yahtzee hand
+
+    Returns a set of tuples, where each tuple is dice to hold
+    """
+    hand_hold = [()]
+    for item in hand:
+        for subset in hand_hold:
+            hand_hold = hand_hold + [tuple(subset) + (item,)]
+    return set(hand_hold)
+
+
+def strategy(hand, num_die_sides):
+    """
+    Compute the hold that maximizes the expected value when the
+    discarded dice are rolled.
+
+    hand: full yahtzee hand
+    num_die_sides: number of sides on each die
+
+    Returns a tuple where the first element is the expected score and
+    the second element is a tuple of the dice to hold
+    """
+    result = (0.0, ())
+    current_score = 0.0
+    
+    for item in gen_all_holds(hand):
+        value = expected_value(item, num_die_sides, len(hand) - len(item))
+        if value > current_score:
+            current_score = value
+            result = (current_score, item)
+  
+    return result
+
+
+def run_example():
+    """
+    Compute the dice to hold and expected score for an example hand
+    """
+    num_die_sides = 6
+    hand = (1, 1, 1, 5, 6)
+    hand_score, hold = strategy(hand, num_die_sides)
+    print "Best strategy for hand", hand, "is to hold", hold, "with expected score", hand_score
+
+run_example()
+
+
+#import poc_holds_testsuite
+#poc_holds_testsuite.run_suite(gen_all_holds)
+```
