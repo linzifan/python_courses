@@ -66,6 +66,9 @@ As you work on your merge function, here are some simple tests you should try:
 These tests are by no means exhaustive and are just meant to get you started.
 
 ### Submission
+
+[Owltest page](http://codeskulptor.appspot.com/owltest/?urlTests=poc.poc_2048_merge_tests.py&urlPylintConfig=poc.pylint_config.py)
+
 ```{r test-python, eval=FALSE, engine='python'}
 """
 Merge function for 2048 game.
