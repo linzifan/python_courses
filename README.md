@@ -14,7 +14,7 @@ Coming soon...
 
 #### Principles of Computing (Part 1)
 - Mini-Project 1: [2048 (Merge)](http://linzifan.github.io/python_courses/PoC-Project1)
-- Mini-Project 2: [2048 (Full)]((http://linzifan.github.io/python_courses/PoC-Project2)
+- Mini-Project 2: [2048 (Full)](http://linzifan.github.io/python_courses/PoC-Project2)
 - Mini-Project 3: Tic-Tac-Toe (Monte Carlo)
 - Mini-Project 4: Yahtzee
 - Mini-Project 5: Cookie Clicker
@@ -25,4 +25,4 @@ Coming soon...
 Coming soon...
 
 
-[Index]()
+[Index](http://linzifan.github.io/python_courses/Index)
