@@ -1,0 +1,161 @@
+---
+title: "PoC-Practice 1"
+author: "Zifan Lin"
+date: ""
+output: html_document
+---
+
+## Solitaire Mancala
+
+### Overview
+
+[Mancala](http://en.wikipedia.org/wiki/Mancala) consists of a family of games in which the objective of a player is to move sets of objects around a board. One variant of Mancala that is played frequently in the United States is the game [Kalah](http://en.wikipedia.org/wiki/Kalah). (For the sake of simplicity, we will just refer to Kalah as "Mancala".) In this variant, the Mancala board consists of two rows of six pits called houses with one row facing each player and one larger pit at each end of the board called a store. The store on the player's right end of the board is considered to belong to the player.
+At the start of a game, each house contains some number of seeds (usually three). On a player's turn, a player chooses one of the houses on his side of the board, removes the seeds from that house, and places one seed in each neighboring house or store in a counter clockwise direction. Since seeds cannot be removed from a store, all of the seeds will eventually accumulate in the two stores at the ends of the board. The player whose store contains the most seeds at the end of the game wins. To get a better feel for how Mancala works, try searching for "Mancala online" and you will find lots of sites that allow you to play online against a computer.
+
+For the two player variant, there are several other rules designed to encourage more complex game play. However, our computing skills are not quite robust enough to tackle building a computer algorithm to play a reasonable game of two-player Mancala at this point. Instead, we will focus on a simpler one-player version of Mancala called Tchoukaillon. Since this name is rather unwieldy, we refer to this game as Solitaire Mancala.
+
+In Solitaire Mancala, the player has six houses and a store. At the start of a game, a variable number of seeds are placed in each house (as opposed to the three seeds per house in two-player Mancala). As in two-player Mancala, the player may select a house and gather all of the seeds in that house. The player then places the seeds one at time in the houses to the right of the selected house. In Solitaire Mancala, the last seed must be placed in the store. Other moves that either don't place a seed in store or end up with seeds left over are not allowed and are illegal. Note that the restriction that the last seed in a move must always be placed in the store substantially limits the choice of legal moves available to the player. If we index the store and houses from right to left starting at zero for the store, moving the seeds from a particular house is legal exactly when the number of seeds in the house matches the house's index.
+
+
+### Mini-project description
+
+In this mini-project, we will implement a small Python program that models a game of Solitaire Mancala using an object-oriented approach. In particular, your task is to implement a `SolitaireMancala` class that models the current configuration of a game of Solitaire Mancala and provide several methods for analyzing and updating the game. You are welcome to start from this provided [program template](http://www.codeskulptor.org/#poc_mancala_template.py).
+
+We suggest that you represent the configuration of the board as a list of integers with the first entry in the list being the current number of seeds in the store. In general, the ith entry of the list should represent the number of seeds in the ith house where the houses are indexed in ascending order from right to left. In the top configuration shown above, this list would be `[0, 1, 1, 3, 0, 0, 0]`.
+
+Your `SolitaireMancala` class should support the following methods:
+
+- `__init__(self)`: Create a `SolitaireMancala` object whose configuration consists of a board with an empty store and no houses (i.e; the configuration `[0]`).
+- `set_board(self, configuration)`: Set the board to be a copy of the supplied configuration (to avoiding referencing issues). The configuration will be a list of integers in the form described above.
+- `__str__(self)`: Return a string corresponding to the current configuration of the Mancala board. This string is formatted as a list with the store appearing in the rightmost (last) entry. Consecutive entries should be separated by a comma and blank (as done by Python when converting a list to a string).
+- `get_num_seeds(self, house_num)`: Return the number of seeds in the house with index `house_num`. Note that house 0 corresponds to the store.
+- `is_legal_move(self, house_num)`: Return `True` if moving the seeds from house `house_num` is legal. Otherwise, return `False`. If `house_num` is zero, `is_legal_move` should return False.
+- `apply_move(self, house_num)`: Apply a legal move for house `house_num` to the board.
+- `choose_move(self)`: Return the index for the legal move whose house is closest to the store. If no legal move is available, return `0`.
+- `is_game_won(self)`: Return `True` if all houses contain no seeds. Return `False` otherwise.
+- `plan_moves(self)`: Given a Mancala game, return a sequence (list) of legal moves based on the following heuristic: after each move, move the seeds in the house closest to the store when given a choice of legal moves. Note that this method should not update the current configuration of the game.
+
+Observe that the method `plan_moves` should return a sequence of moves that wins the game if the initial configuration is winnable. If the configuration is not winnable, `plan_moves` returns a sequence of moves that leaves the board in a configuration with no legal moves.
+
+
+### Submission
+
+[Owltest page](http://codeskulptor.appspot.com/owltest/?urlTests=poc.poc_mancala_machine.py&urlPylintConfig=poc.pylint_config.py)
+
+```{r test-python, eval=FALSE, engine='python'}
+"""
+Student facing implement of solitaire version of Mancala - Tchoukaillon
+Goal: Move as many seeds from given houses into the store
+In GUI, you make ask computer AI to make move or click to attempt a legal move
+"""
+
+class SolitaireMancala:
+    """
+    Simple class that implements Solitaire Mancala
+    """    
+    def __init__(self):
+        """
+        Create Mancala game with empty store and no houses
+        """
+        self.board = []
+    
+    def set_board(self, configuration):
+        """
+        Take the list configuration of initial number of seeds for given houses
+        house zero corresponds to the store and is on right
+        houses are number in ascending order from right to left
+        """
+        self.board = configuration[:]
+    
+    def __str__(self):
+        """
+        Return string representation for Mancala board
+        """
+        return str(self.board[::-1])
+    
+    def get_num_seeds(self, house_num):
+        """
+        Return the number of seeds in given house on board
+        """
+        return self.board[house_num]
+
+    def is_game_won(self):
+        """
+        Check to see if all houses but house zero are empty
+        """
+        return sum(self.board[1:]) == 0
+    
+    def is_legal_move(self, house_num):
+        """
+        Check whether a given move is legal
+        """
+        return self.board[house_num] == house_num and house_num != 0
+
+    
+    def apply_move(self, house_num):
+        """
+        Move all of the stones from house to lower/left houses
+        Last seed must be played in the store (house zero)
+        """
+        if self.is_legal_move(house_num):
+            # adding +1 to each position lying in front of (and excluding) house_num
+            for position in xrange(len(self.board[:house_num])):
+                self.board[position] += 1
+            # current house (house_num) is then emptied
+            self.board[house_num] = 0
+        else:
+            print 'This is an illegal move!'
+
+    def choose_move(self):
+        """
+        Return the house for the next shortest legal move
+        Shortest means legal move from house closest to store
+        Note that using a longer legal move would make smaller illegal
+        If no legal move, return house zero
+        """
+        index = 0
+        # checking through each position backwards just to arrive at closest one
+        for num in range(len(self.board))[::-1]:
+            if self.is_legal_move(num):
+                index = num
+        return index
+    
+    def plan_moves(self):
+        """
+        Return a sequence (list) of legal moves based on the following heuristic: 
+        After each move, move the seeds in the house closest to the store 
+        when given a choice of legal moves
+        Not used in GUI version, only for machine testing
+        """
+        legal_moves = []
+        # game isn't won yet and there is still at least one legal move
+        while not self.is_game_won() and self.choose_move() != 0:
+            # make a note of and apply every possible move suggested
+            legal_moves.append(self.choose_move())
+            self.apply_move(self.choose_move())
+        return legal_moves
+ 
+
+# Create tests to check the correctness of your code
+def test_mancala():
+    """
+    Test code for Solitaire Mancala
+    """    
+    my_game = SolitaireMancala()
+    print "Testing init - Computed:", my_game, "Expected: [0]"
+    
+    config1 = [0, 0, 1, 1, 3, 5, 0]    
+    my_game.set_board(config1)   
+    
+    print "Testing set_board - Computed:", str(my_game), "Expected:", str([0, 5, 3, 1, 1, 0, 0])
+    print "Testing get_num_seeds - Computed:", my_game.get_num_seeds(1), "Expected:", config1[1]
+    print "Testing get_num_seeds - Computed:", my_game.get_num_seeds(3), "Expected:", config1[3]
+    print "Testing get_num_seeds - Computed:", my_game.get_num_seeds(5), "Expected:", config1[5]
+    # add more tests here
+test_mancala()
+
+
+# Import GUI code once you feel your code is correct
+# import poc_mancala_gui
+# poc_mancala_gui.run_gui(SolitaireMancala())
+```
