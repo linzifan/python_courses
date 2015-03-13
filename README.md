@@ -18,7 +18,8 @@ Coming soon...
 - Mini-Project 3: Tic-Tac-Toe (Monte Carlo)
 - Mini-Project 4: Yahtzee
 - Mini-Project 5: Cookie Clicker
-- Practice Activities
+- Practice 1: Solitaire Mancala
+- Practice 2: Nim (Monte Carlo)
 
 
 #### Principles of Computing (Part 2)
