@@ -15,10 +15,10 @@ Coming soon...
 #### Principles of Computing (Part 1)
 - Mini-Project 1: [2048 (Merge)](http://linzifan.github.io/python_courses/PoC-Project1)
 - Mini-Project 2: [2048 (Full)](http://linzifan.github.io/python_courses/PoC-Project2)
-- Mini-Project 3: [Tic-Tac-Toe (Monte Carlo)]((http://linzifan.github.io/python_courses/PoC-Project3)
+- Mini-Project 3: [Tic-Tac-Toe (Monte Carlo)](http://linzifan.github.io/python_courses/PoC-Project3)
 - Mini-Project 4: [Yahtzee](http://linzifan.github.io/python_courses/PoC-Project4)
 - Mini-Project 5: Cookie Clicker
-- Practice 1: [Solitaire Mancala]((http://linzifan.github.io/python_courses/PoC-Practice1)
+- Practice 1: [Solitaire Mancala](http://linzifan.github.io/python_courses/PoC-Practice1)
 - Practice 2: Nim (Monte Carlo)
 
 
