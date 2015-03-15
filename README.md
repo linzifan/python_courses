@@ -20,6 +20,7 @@ Coming soon...
 - Mini-Project 5: Cookie Clicker
 - Practice 1: [Solitaire Mancala](http://linzifan.github.io/python_courses/PoC-Practice1)
 - Practice 2: Nim (Monte Carlo)
+- Practice 3: [The Case of the Greedy Boss](http://linzifan.github.io/python_courses/PoC-Practice3)
 
 
 #### Principles of Computing (Part 2)
