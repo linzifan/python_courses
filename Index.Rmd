@@ -22,7 +22,7 @@ Coming soon...
 - Mini-Project 2: [2048 (Full)](http://linzifan.github.io/python_courses/PoC-Project2)
 - Mini-Project 3: [Tic-Tac-Toe (Monte Carlo)](http://linzifan.github.io/python_courses/PoC-Project3)
 - Mini-Project 4: [Yahtzee](http://linzifan.github.io/python_courses/PoC-Project4)
-- Mini-Project 5: Cookie Clicker
+- Mini-Project 5: [Cookie Clicker](http://linzifan.github.io/python_courses/PoC-Project5)
 - Practice 1: [Solitaire Mancala](http://linzifan.github.io/python_courses/PoC-Practice1)
 - Practice 2: Nim (Monte Carlo)
 - Practice 3: [The Case of the Greedy Boss](http://linzifan.github.io/python_courses/PoC-Practice3)
