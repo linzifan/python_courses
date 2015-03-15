@@ -1,0 +1,136 @@
+---
+title: "PoC-Practice 3"
+author: "Zifan Lin"
+date: ""
+output: html_document
+---
+
+## The Case of the Greedy Boss
+
+In life, you are often faced with a fundamental choice: do I enjoy the benefits of the resources that I have earned or invest those resources so as to improve my life in the long-term? For example, if you've graduated from college, you may have been faced with the following choice:
+
+- Find a job and enjoy the immediate benefits of earning a reasonable salary or,
+- Go to graduate school (while paying tuition and living on a shoestring) with the prospect of getting a better job in the future.
+
+One of the reasons for the popularity of real-time strategy games like Warcraft 3 and Starcraft is that they allowed the player to experiment with different strategies for resources allocation. One strategy might be to immediately generate lots of weak low cost units and try to overwhelm an opponent who is investing in developing the technological capability to build more powerful (and costly) units.
+
+This week's mini-project involves building a simulator for the web-based game [Cookie Clicker](http://orteil.dashnet.org/cookieclicker/). In Cookie Clicker, your goal is to bake as many cookies a possible in a given period of time. (Or alternatively, bake a fixed number of cookies as quickly as possible.) Game play in Cookie Clicker involves choosing strategically among several methods of upgrading your ability to bake cookies with the goal of baking as many cookies as quickly as possible.
+
+### The greedy boss scenario
+
+Since the simulation that makes up Cookie Clicker is fairly complex, this practice activity considers a simpler scenario as described in the following forum post from the first session of Principles of Computing.
+
+"Let's say you have a job that pays a salary of $100 a day. You know your boss can be bribed to increase your salary to $200 dollars a day if you pay him $1000. How long would it take you to earn $1000 for the bribe? How much would you paid be after the bribe? Here is a good question to get you thinking in the right direction. If you bribed your boss as soon as you have enough money saved up for the bribe, how much money would you have earned (bribes included) in 20 days?
+
+Now, what happens if your boss is really greedy and will increase your salary by $100 dollar per day every time you give him $1000 dollars? How fast would your salary increase? Finally, let say that your boss is both greedy and smart. He wants a bigger bribe every time he increases your salary. What would happen? That is basically the scenario in Cookie Clicker."
+
+### Implementing a greedy boss simulator
+
+Your task in this activity is to write a simulator for the greedy boss scenario described above. This simulator will follow a simple strategy designed to increase your current salary as quickly as possible. In particular, the simulator should bribe the boss at the end of the first day where your current savings is sufficient to afford the cost of the bribe. To get you started, we have created [program template](http://www.codeskulptor.org/#poc_greedy_template.py) that implements some of the non-essential parts of the simulator.
+
+In your simulator, you should assume that your initial salary is $100 per day and that each bribe paid to your boss increases your salary by $100 per day. You can also assume that the cost of the initial bribe is $1000. Your main task is to complete the body of the function `greedy_boss(days_in_simulation, bribe_cost_increment, plot_type)` which takes as input the number of days in the simulation (an integer) and the amount by which the boss increases the cost of a bribe after each bribe (an integer). The final parameter has either the constant value `STANDARD` or `LOGLOG` and specifies whether the returned list `days_vs_earnings` is either in standard scale or log/log scale.
+
+While implementing `greedy_boss`, you should settle on the various quantities that the simulator will need to maintain as part of the simulation and then initialize those quantities appropriately. You should then implement the body of the `while` loop in the template. Note that this loop should increment the variable `current_days` during each execution of its body. However, **each iteration of the loop should advance the current directly to the day of the next bribe** instead of incrementing the current day by a single day. Advancing the current day directly to the day of the next bribe makes the resulting simulation more efficient since nothing interesting happens while waiting to accumulate enough savings to afford a bribe. We will take this same approach in Cookie Clicker.
+
+One important feature of the greedy boss scenario is that the boss accepts bribes only at the end of the day. As a result, any daily earnings that are unspent on the bribe should be retained for future bribes. Also, in some situations, your salary may be larger enough such that you can afford to pay the boss several bribes at the end of the day. Your boss will happily accept them and this behavior should be incorporated into your implementation of the simulator.
+
+The bottom of the template includes two example inputs and outputs designed to help in debugging your code. (Note that the second example includes two bribes being paid at the end of day 34.) We suggest that you make a substantial attempt at completing this activity on your own. While peeking at our sample solution immediately is very tempting, working through this problem on your own is worthwhile. The behavior of the greedy boss simulator is designed to mimic the behavior of the simulator that you will build for Cooke Clicker. Time spent here will be time saved working on Cookie Clicker.
+
+### Experimenting with the greedy boss simulator
+
+Once you are satisfied with your implementation of `greedy_boss`, you are welcome to consult [our implementation](http://www.codeskulptor.org/#poc_greedy_solution.py). The function `run_simulation` calls the simulator for a specified number of days with various values for the cost increment of a bribe. If you examine the plots for total salary earned as a function of day passed, you will note (not surprisingly) that, if the boss doesn't ask for any increase in the cost of the bribe, total salary earned (including the cost of the bribes) increases fastest as a function of days past. As the size of the increment to the bribe increases, total salary earned increases at a slower rate. Much of Homework 5 will consider the behavior of the greedy boss simulation in more detail for various increments to the cost of bribes.
+
+
+### Submission
+
+
+
+```{r test-python, eval=FALSE, engine='python'}
+"""
+Simulator for greedy boss scenario
+"""
+
+import simpleplot
+import math
+import codeskulptor
+codeskulptor.set_timeout(20)
+
+STANDARD = True
+LOGLOG = False
+
+# constants for simulation
+INITIAL_SALARY = 100
+SALARY_INCREMENT = 100
+INITIAL_BRIBE_COST = 1000
+
+
+def greedy_boss(days_in_simulation, bribe_cost_increment, plot_type = STANDARD):
+    """
+    Simulation of greedy boss
+    """
+    
+    # initialize necessary local variables
+    current_day = 0
+    current_savings = 0
+    total_salary_earned = 0
+    current_bribe_cost = INITIAL_BRIBE_COST
+    current_salary = INITIAL_SALARY
+
+    
+    # define  list consisting of days vs. total salary earned for analysis
+    days_vs_earnings = []
+
+    # Each iteration of this while loop simulates one bribe
+    while current_day <= days_in_simulation:
+        
+        # update list with days vs total salary earned
+        # use plot_type to control whether regular or log/log plot
+        if plot_type == STANDARD:
+            days_vs_earnings.append((current_day, total_salary_earned))
+        else:
+            days_vs_earnings.append([math.log(current_day), math.log(total_salary_earned)])
+        
+        # check whether we have enough money to bribe without waiting
+        if current_savings > current_bribe_cost:
+            days_to_next_bribe = 0
+        else:
+            days_to_next_bribe = int(math.ceil((current_bribe_cost - current_savings) / float(current_salary)))
+
+              
+        # advance current_day to day of next bribe (DO NOT INCREMENT BY ONE DAY)
+        current_day += days_to_next_bribe
+
+        # update state of simulation to reflect bribe
+        current_savings += days_to_next_bribe * current_salary
+        current_savings -= current_bribe_cost
+        total_salary_earned += days_to_next_bribe * current_salary
+        current_bribe_cost += bribe_cost_increment
+        current_salary += SALARY_INCREMENT
+   
+    return days_vs_earnings
+
+
+def run_simulations():
+    """
+    Run simulations for several possible bribe increments
+    """
+    plot_type = STANDARD
+    days = 70
+    inc_0 = greedy_boss(days, 0, plot_type)
+    inc_500 = greedy_boss(days, 500, plot_type)
+    inc_1000 = greedy_boss(days, 1000, plot_type)
+    inc_2000 = greedy_boss(days, 2000, plot_type)
+    simpleplot.plot_lines("Greedy boss", 600, 600, "days", "total earnings", 
+                          [inc_0, inc_500, inc_1000, inc_2000], False,
+                         ["Bribe increment = 0", "Bribe increment = 500",
+                          "Bribe increment = 1000", "Bribe increment = 2000"])
+
+run_simulations()
+
+print greedy_boss(35, 100)
+# should print [(0, 0), (10, 1000), (16, 2200), (20, 3400), (23, 4600), (26, 6100), (29, 7900), (31, 9300), (33, 10900), (35, 12700)]
+
+print greedy_boss(35, 0)
+# should print [(0, 0), (10, 1000), (15, 2000), (19, 3200), (21, 4000), (23, 5000), (25, 6200), (27, 7600), (28, 8400), (29, 9300), (30, 10300), (31, 11400), (32, 12600), (33, 13900), (34, 15300), (34, 15300), (35, 16900)]
+
+```
