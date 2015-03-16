@@ -1,8 +1,7 @@
-
 """
 Cookie Clicker Simulator
 """
-http://www.codeskulptor.org/#user39_jgyUhHdP8Z_5.py
+http://www.codeskulptor.org/#user39_CCxO5JObUb_2.py
 
 
 import simpleplot
@@ -210,12 +209,18 @@ def strategy_best(cookies, cps, history, time_left, build_info):
     The best strategy that you are able to implement.
     """
     pricelist = {}
-    fund = cookies + cps * time_left
+    cpslist = {}
     for item in build_info.build_items():
-        if build_info.get_cost(item) <= fund:
-            pricelist[build_info.get_cost(item) / build_info.get_cps(item)] = item
-    if len(pricelist) > 0:
-        return pricelist[max(pricelist)]
+        pricelist[build_info.get_cost(item)] = item
+        cpslist[build_info.get_cps(item) / build_info.get_cost(item)] = item
+    if build_info.get_cost(pricelist[min(pricelist)]) <= cookies + cps * time_left:
+        # in order to get as many cookies as possible, at the beginning 1.5% and 
+        # at the end 30% of simulation time, choose the item with lowest price,
+        # other time choose the item with highest cps/cost
+        if time_left > SIM_TIME / 100 * 98.5 or time_left < SIM_TIME / 100 * 30:
+            return pricelist[min(pricelist)]
+        else:
+            return cpslist[max(cpslist)]
     else:
         return None
         
