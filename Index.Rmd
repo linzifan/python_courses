@@ -14,7 +14,7 @@ All projects presented here are from [Rice University online courses](https://ww
 - Mini-Project 4: ["Pong"](http://linzifan.github.io/python_courses/IPP-Project4)
 
 #### An Introduction to Interactive Programming in Python (Part 2)
-Coming soon...
+- Mini-Project 5: [Memory](http://linzifan.github.io/python_courses/IPP-Project5)
 
 
 #### Principles of Computing (Part 1)
