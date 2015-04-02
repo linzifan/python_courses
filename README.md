@@ -7,10 +7,10 @@ All projects presented here are from [Rice University online courses](https://ww
 - Mini-Project 2: ["Guess the number" game](http://linzifan.github.io/python_courses/IPP-Project2)
 - Mini-Project 3: [Stopwatch: The Game](http://linzifan.github.io/python_courses/IPP-Project3)
 - Mini-Project 4: ["Pong"](http://linzifan.github.io/python_courses/IPP-Project4)
-- Mini-Project 5: [Memory](http://linzifan.github.io/python_courses/IPP-Project5)
+
 
 #### An Introduction to Interactive Programming in Python (Part 2)
-Coming soon...
+- Mini-Project 5: [Memory](http://linzifan.github.io/python_courses/IPP-Project5)
 
 
 #### Principles of Computing (Part 1)
