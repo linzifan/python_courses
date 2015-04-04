@@ -9,392 +9,77 @@ output: html_document
 
 ### Overview
 
-Cookie Clicker is a game built around a simulation in which your goal is to bake as many cookies as fast as possible. The main strategy component of the game is choosing how to allocate the cookies that you have produced to upgrade your ability to produce even more cookies faster. You can play Cookie Clicker [here](http://orteil.dashnet.org/cookieclicker/). Before you start work on this mini-project, we strongly recommend that you complete the Practice Activity ["The Case of the Greedy Boss"](http://linzifan.github.io/python_courses/PoC-Practice3) which is designed to walk you through the steps of building a simulation similar to Cookie Clicker.
+In this mini-project, we will create a simulation of zombies and humans interacting on a grid. As in the movies, our zombies are hungry for human brains. As a result, zombies chase humans and humans flee from zombies. To keep our simulation manageable, the positions of the zombies and humans will be restricted to a grid. In our simulation, zombies are not very agile and can only move up, down, left or right in one step of the simulation. On the other hand, humans are more agile and can move in these four directions as well as the four neighboring diagonal directions. If a zombie catches a human by positioning itself in the same cell, the zombie enjoys some delicious human brains. Being a Computer Scientist, the human has plenty of brains to spare and continues to live on in our simulation.
 
-In Cookie Clicker, you have many options for upgrading your ability to produce cookies. Originally, you can only produce cookies by clicking your mouse. However, you can use the cookies you earn to buy other methods of producing cookies (Grandmas, farms, factories, etc.). Each production method increases the number of "cookies per second" (CPS) you produce. Further, each time you buy one of the production methods, its price goes up. So, you must carefully consider the cost and benefits of purchasing a production method, and the trade-offs change as the game goes on.
+To enhance the realism of our simulation, some of the cells in this grid will be marked as impassable and restrict zombie/human movement so that they can not move through these cells. Our task in this simulation is to implement a `Zombie` class that encapsulates the core mechanisms of this simulation and that interacts with a GUI that we have created for visualizing the simulation in CodeSkulptor. This `Zombie` class is a sub-class of the [`Grid` class](http://www.codeskulptor.org/#poc_grid.py) and inherits the `Grid` class methods. Passable cells in the grid correspond to `EMPTY` cells while `FULL` cells are impassable. Humans and zombies can only inhabit passable cells of the grid. However, several humans and zombies may inhabit the same grid cell.
 
-For this assignment, you will implement a simplified simulation of the Cookie Clicker game. You will implement different strategies and see how they fare over a given period of time. In our version of the game, there is no graphical interface and therefore no actual "clicking". Instead, you will start with a CPS of 1.0 and may start purchasing automatic production methods once you have enough cookies to do so. You will implement both the simulation engine for the game and your own strategies for selecting what production methods to buy.
-
-We have provided the following [template](http://www.codeskulptor.org/#poc_clicker_template.py) that contains an outline of the code you will write, including a `ClickerState` class, which will keep track of the state of the simulation, and a `simulate_clicker` function, which will run the simulation. The signature (name and parameters) of the functions, classes, and methods in this file must remain unchanged, but you may add any additional functions, methods, or other code that you need to.
-
-### Provided Code
-
-We have provided a `BuildInfo` class for you to use. This class keeps track of the cost (in cookies) and value (in CPS) of each item (production method) that you can buy. When you create a new `BuildInfo` object, it is initialized by default with the default parameters for our game. Keep in mind that if you pass a `BuildInfo` object around in your program and it is modified anywhere, then you will see the changes everywhere. If you do not want that, we have provided a `clone` method that will create an identical copy of the object. You can see a description of the class and its methods here. 
-
-```
-class BuildInfo:
-    """
-    Class to track build information.
-    """
-    
-    def __init__(self, build_info = None, growth_factor = BUILD_GROWTH):
-        """
-        Initialize the BuildInfo object. Use default arguments for the game.
-        """
-            
-    def build_items(self):
-        """
-        Get a list of buildable items sorted by name.
-        """
-            
-    def get_cost(self, item):
-        """
-        Get the current cost of an item.
-        Will throw a KeyError exception if item is not in the build info.
-        """
-    
-    def get_cps(self, item):
-        """
-        Get the current CPS of an item
-        Will throw a KeyError exception if item is not in the build info.
-        """
-    
-    def update_item(self, item):
-        """
-        Update the cost of an item by the growth factor
-        Will throw a KeyError exception if item is not in the build info.
-        """
-        
-    def clone(self):
-        """
-        Return a clone of this BuildInfo
-        """
-```
-
-It has methods to allow you to find out what all of the items' names are, the cost per CPS of each item, and to update the cost of a particular item appropriately.
-
-We have also provided a `run` function to run your simulator. Note that the `run` function simply calls `run_strategy`, which runs the simulator once with a given strategy. You can add more calls to `run_strategy` inside of `run` once you develop your own strategies. The `run_strategy` function runs the simulation, prints out the final state of the game after the given time and then plots the total number of cookies over time. You can replace our `SimplePlot` plotting code with your own plotting code if you wish to use IDLE or another Python IDE. If you do leave our plots in, make sure that your web browser is configured to allow popup windows from CodeSkulptor. The plots will help you understand how the number of cookies grow over time, which is the point of this week in the class, so we recommend you do look at the plots, even if you comment them out while you are debugging.
-
-We have provided a simple strategy, called `strategy_cursor_broken`. Note the signature of the function: `strategy_cursor_broken(cookies, cps, history, time_left, build_info)`. All strategy functions take the current number of cookies, the current CPS, the history of purchases in the simulation, the amount of time left in the simulation, and a `BuildInfo` object (even if they don't use these parameters). You'll note that this simple strategy just always picks `"Cursor"` no matter what the state of the game is. This is obviously not a good strategy (and it violates the requirements of a strategy function given below), but rather is a placeholder so you can see the signature of a strategy function looks like and use it while you are debugging other parts of your code.
-
+This `Zombie` class also includes two lists, one for zombies and one for humans. Note that the entries in each list are cell indices of the form `(row, col)` that represent the position of zombies/humans in the grid. Each step in the simulation will either update the positions of the zombies based on the state of the grid and the position of the humans or update the positions of the humans based on the state of the grid and the position of the zombies.
 
 ### Phase One
 
-You should first implement the `ClickerState` class. This class will keep track of the state of the game during a simulation. This various fields in this class should roughly correspond to the local variables used in implementing the function `greedy_boss` in the Practice Activity. (Cookies correspond to money and upgrades to CPS correspond to bribes.) By encapsulating the game state in this class, the logic for running a simulation of the game will be greatly simplified. The `ClickerState` class must keep track of four things:
+In phase one, we will implement the basic methods for the `Zombie` class. We suggest that you start from [this template](http://www.codeskulptor.org/#poc_zombie_template.py). Note that the `Zombie` class is a subclass of the `Grid` class and inherits all of its methods.
 
-1. The total number of cookies produced throughout the entire game (this should be initialized to `0.0`).
-2. The current number of cookies you have (this should be initialized to `0.0`).
-3. The current time (in seconds) of the game (this should be initialized to `0.0`).
-4. The current CPS (this should be initialized to `1.0`).
+The template contains an implementation of the `__init__` method for the `Zombie` class. The initializer takes two required arguments `grid_height` and `grid_width`. The initializer also takes three optional arguments `obstacle_list`, `zombie_list`, and `human_list` which are lists of cells that initially contain obstacles, zombies and humans, respectively. For phase one, your task is to implement the remaining seven `Zombie` methods:
 
-Note that you should use `float` to keep track of all state properties. You will have fractional values for cookies and CPS throughout.
+- `def clear(self)`: Reset all cells in the grid to be passable and reinitialize the human and zombie lists to be empty. Remember that you can use the `clear` method from the `poc_grid.Grid` class to clear the grid of impassable cells. Examine the implementation of the `__init__` method for how to call this method.
+- `def add_zombie(self, row, col)`: Add a zombie to the zombie list at the supplied row and column.
+- `def num_zombies(self)`: Return the number of zombies in the zombie list.
+- `def zombies(self)`: Generator that allows you to iterate over zombies in the zombie list. Here, a zombie is a tuple of the form `(row, col)` indicating the zombie's location in the grid. The generator must yield the zombies in the order they were added (even if they have moved). Remember that you can use a generator to implement this method in one or two lines of code.
+- `def add_human(self, row, col)`: Add a human to the human list at the supplied row and column.
+- `def num_humans(self)`: Return the number of humans in the human list.
+- `def humans(self)`: Generator that allows you to iterate over humans in the human list. The generator must yield the humans in the order they were added (even if they have moved). Again, you can use a generator to implement this method in one or two lines of code.
 
-During a simulation, upgrades are only allowed at an integral number of seconds as required in Cookie Clicker. However, the CPS value is a floating point number. In addition to this information, your `ClickerState` class must also keep track of the history of the game. We will track the history as a list of tuples. Each tuple in the list will contain 4 values: a time, an item that was bought at that time (or `None`), the cost of the item, and the total number of cookies produced by that time. This history list should therefore be initialized as `[(0.0, None, 0.0, 0.0)]`.
-
-The methods of the `ClickerState` class interact with this state as follows:
-
-- `__str__`: This method should return the state (possibly without the history list) as a string in a human readable format. This is primarily to help you develop and debug your program. It will also be used by OwlTest in error messages to show you the state of your `ClickerState` object after you fail a test.
-- `get_cookies`, `get_cps`, `get_time`, `get_history`: These methods should simply return the current number of cookies, the current CPS, the current time, and the history, respectively. Note that `get_history` should return a copy of the history list so that you are not returning a reference to an internal data structure. This will prevent a broken strategy function from inadvertently messing up the history, for instance.
-- `time_until`: This method should return the number of seconds you must wait until you will have the given number of cookies. Remember that you cannot wait for fractional seconds, so while you should return a `float` it should not have a fractional part.
-- `wait`: This method should "wait" for the given amount of time. This means you should appropriately increase the time, the current number of cookies, and the total number of cookies.
-- `buy_item`: This method should "buy" the given item. This means you should appropriately adjust the current number of cookies, the CPS, and add an entry into the history.
-
-If you are passed an argument that is invalid (such as an attempt to buy an item for which you do not have enough cookies), you should just return from the method without doing anything.
+Once you have successfully implemented these methods, you should be able to add zombies (red cells) and humans (green cells) to the simulation by toggling the button labelled `"Mouse click: ..."` and then clicking on the canvas. Cells that are occupied by both zombies and humans are purple.
 
 ### Phase Two
 
-Once you have a complete `ClickerState` class, you are ready to implement `simulate_clicker`. The `simulate_clicker` function should take a `BuildInfo` class, the number of seconds to run the simulation for, and a strategy function. Note that `simulate_clicker` is a higher-order function: it takes a strategy function as an argument!
+Phase two is the core of this mini-project. Your task will be to compute a simple approximation of the distance from each cell in the grid to the nearest zombie (or human). This distance will correspond to the length of the shortest sequence of adjacent grid cells (a path) from the cell to a zombie. This 2D array of integer distances is a distance field. The image below shows an example of two (red) zombies on a $4 \times 6$ grid and the distances from each cell in the grid to the nearest zombie. Note that in this diagram, we are using the cell's four neighbors when determining whether cells are adjacent.
 
-The first thing you should do in this function is to make a clone of the `build_info` object and create a new `ClickerState` object. The function should then loop (in the same manner in the function `greedy_boss` from the Practice Activity) until the time in the `ClickerState` object reaches the duration of the simulation.
+Observe that the distances in this example grow in a manner strikingly similar to the order in which cells are visited during breadth-first search. This observation is not a coincidence. In fact, this distance field was computed using breadth-first search. To compute this distance field, start by recalling the English description of [breadth-first search](https://class.coursera.org/principlescomputing2-002/wiki/view?page=bfs).
 
-For each iteration of the loop, your `simulate_clicker` function should do the following things:
+```
+while boundary is not empty:
+    current_cell  ???  dequeue boundary
+    for all neighbor_cell of current_cell:
+        if neighbor_cell is not in visited:
+            add neighbor_cell to visited
+            enqueue neighbor_cell onto boundary
+```
 
-1. Check the current time and break out of the loop if the duration has been passed.
-2. Call the strategy function with the appropriate arguments to determine which item to purchase next. If the strategy function returns None, you should break out of the loop, as that means no more items will be purchased.
-3. Determine how much time must elapse until it is possible to purchase the item. If you would have to wait past the duration of the simulation to purchase the item, you should end the simulation.
-4. Wait until that time.
-5. Buy the item.
-6. Update the build information.
+This description can be modified to compute a distance field during breadth-first search as follows:
 
-Note that the `ClickerState` class already implements methods that will greatly simplify steps 3???6. Use them!
+- Create a new grid `visited` of the same size as the original grid and initialize its cells to be empty.
+- Create a 2D list `distance_field` of the same size as the original grid and initialize each of its entries to be the product of the height times the width of the grid. (This value is larger than any possible distance.)
+- Create a queue `boundary` that is a **copy** of either the zombie list or the human list. For cells in the queue, initialize `visited` to be `FULL` and `distance_field` to be zero. We recommend that you use our [`Queue class`](http://www.codeskulptor.org/#poc_queue.py).
+- Finally, implement a modified version of the BFS search described above. For each `neighbor_cell` in the inner loop, check whether the cell has not been visited and is passable. If so, update the `visited` grid and the `boundary` queue as specified. In this case, also update the neighbor's distance to be the distance to `current_cell` plus one (`distance_field[current_cell[0]][current_cell[1]] + 1`).
 
-Also note that the time is only incremented when you wait until you can purchase the item selected by the strategy function. You should not try to create a loop that ticks through each second of the simulation. This will not work effectively because it will be incredibly slow. Most times during the simulation you are just waiting until you have accrued enough cookies (this is the boring part of the actual Cookie Clicker game), so the process described above just skips over those times.
+This method computes distances in exactly the order that the wild-fire spreads. When a `neighbor_cell` is added to the queue, that neighbor's distance from a start position is just the distance to the cell `current_cell` plus the one step to the neighbor. Working from the outline above, your task in phase two is to implement the method `compute_distance_field` as specified below:
 
-For correctness, you should not allow the simulation to run past the duration. This means that you should not allow an item to be purchased if you would have to wait until after the duration of the simulation to have enough cookies. Further, after you have exited the loop, if there is time left, you should allow cookies to accumulate for the remainder of the time left. Note that you should allow the purchase of items at the final duration time. Also, if you have enough cookies, it is possible to purchase multiple items at the same time step. (Note that this differs from the actual Cookie Clicker game, where it is not possible to buy multiple items at the same time.) This is most likely to happen exactly at the final duration time, when a strategy might choose to buy as many items as it can, given that there is no more time left.
+- `def compute_distance_field(self, entity_type)`: This method returns a 2D distance field computed using the four-way distance to entities of the given type (either `ZOMBIE` or `HUMAN`). Note that entries of the computed distance fields should be zero at the entities in the specified list. Non-zero distances should be computed using the shortest path computation based on breadth-first search described above. These shortest paths should avoid impassable cells.
 
-Finally, you should return the `ClickerState` object that contains the state of the game.
-
-If you have implemented things correctly, with the provided `strategy_cursor_broke`n function, the given `SIM_TIME`, and default `BuildInfo`, the final state of the game should be:
-
-- Time: 10000000000.0
-- Current Cookies: 6965195661.5
-- CPS: 16.1
-- Total Cookies: 153308849166.0
+Finally, if you are having trouble converting our English description above into Python, remember that the `update_boundary()` method from the [wild-fire demo](http://www.codeskulptor.org/#poc_wildfire_student.py) implements one step of breadth-first search.
 
 
 ### Phase Three
 
-Finally, you should implement some strategies to select items for you game. You are required to implement the following strategies:
+In phase three, your task is to implement two final methods that update the positions of the zombies and humans, respectively.
 
-1. `strategy_cheap`: this strategy should always select the cheapest item that you can afford in the time left.
-2. `strategy_expensive`: this strategy should always select the most expensive item you can afford in the time left.
-3. `strategy_best`: this is the best strategy that you can come up with.
+- `def move_humans(self, zombie_distance)`: This method updates the entries in the human list to model humans avoiding zombies. Each human either stays in its current cell or moves to a neighboring cell to maximize its distance from the zombies. Specifically, humans move to a cell that maximize their distance from the zombies according to the supplied `zombie_distance` field. In the case where several cells shared the same maximal distance, we recommend (but do not require) choosing among these cells at random.
+- `def move_zombies(self, human_distance)`: This method updates the entries in the zombie list to model zombies chasing humans. Each zombie either stays in its current cell or moves to a neighboring cell to minimize its distance to the humans. Specifically, zombies moves to the cell that minimizes their distance to the humans according to the supplied `human_distance` field. In the case where several cells shared the same minimal distance, we recommend choosing (but do not require) among these cells at random.
+Once you have successfully implemented the three methods in phase two and phase three, the buttons in the GUI labelled `"Zombies stalk"` and `"Humans flee"` should work. Zombies should stalk humans and humans should flee zombies. We encourage you to spend some time testing/experimenting with the simulation using our GUI. Once your code works, submit it to Owltest for grading.
 
-If there is not enough time left for you to buy any more items (or your strategy chooses not to), your strategy function should return `None`, otherwise your strategy functions should return a valid name of an item as a string. As described above, if your strategy function returns `None` this should cause your `simulate_clicker` function to exit the loop and finish the simulation.
+### Just for fun! Observations from the simulation
 
-For `strategy_best`, you will be graded on how many total cookies you are able to earn with the default `SIM_TIME` and `BuildInfo`. To receive full credit, you must get at least $1.30 \times 10^{18}$ total cookies. In addition, you may implement as many other strategies as you like. We will have a forum thread dedicated to showing off your favorite/best strategies!
+At a distance, zombies are quite good at finding humans (even ones hiding in buildings) since breadth-first search always searches the interiors of buildings (provided there is an entrance). The human distance field decreases steadily and always reaches zero at a delicious human brain. Humans, on the other hand, aren't so smart while fleeing since they greedily maximize the local distance away from the nearest zombies on each step. As a result, humans often run to the nearest corner of a building and cower as the zombies approach. (Hey, this is a pretty realistic simulation!)
 
+However, in close quarters, humans have a large advantage since they can move diagonally. Unless cornered by multiple zombies, humans can easily out-maneuver a single zombie and avoid having their brains eaten. For packs of zombies inhabiting a single cell, the strategy for breaking ties in `move_zombies` is important. When the pack has a choice between moving to two neighboring cells that minimize distance, always choosing the one cell or the other causes the zombies to stay in clumped in a single cell. Having each zombie choose between the two cells at random causes the pack to tend to disperse.
+
+This situation arises when the pack is chasing a human that is fleeing diagonally (say down and left). There are two directions (down or left) that are available to the zombies that minimize the distance to the human. Instead of having all of the zombies move in the same direction, each zombie should choose one of the two optimal directions randomly. With the random approach, some zombies go down and some zombies go left and the pack of zombies tends to spread out. This behavior makes the zombies more likely to catch the human when he/she ends up huddled in a corner.
+
+There are several other interesting scenarios in the simulation that we will let you explore on your own. For example, you might consider creating a "zombie-proof" building that exploits the human's ability to move diagonally between obstacles. Feel free to post interesting scenarios that you discover in the forum. So, have fun and enjoy some "Brains!"
 
 
 ### Submission
 
-[Owltest page](http://www.codeskulptor.appspot.com/owltest?urlTests=poc.poc_clicker_tests.py&urlPylintConfig=poc.pylint_config.py&imports=%7Bpoc:(poc_clicker_provided)%7D)
+[Owltest page](http://codeskulptor.appspot.com/owltest?urlTests=poc.poc_zombie_tests.py&urlPylintConfig=poc.pylint_config.py&imports=%7Bpoc:(poc_grid,poc_queue,poc_zombie_gui)%7D&)
 
-```{r test-python, eval=FALSE, engine='python'}
-"""
-Cookie Clicker Simulator
-"""
-http://www.codeskulptor.org/#user39_CCxO5JObUb_2.py
-
-
-import simpleplot
-import math
-# Used to increase the timeout, if necessary
-import codeskulptor
-codeskulptor.set_timeout(20)
-
-import poc_clicker_provided as provided
-
-# Constants
-SIM_TIME = 10000000000.0
-
-class ClickerState:
-    """
-    Simple class to keep track of the game state.
-    """
-    
-    def __init__(self):
-        self._total_cookies = 0.0
-        self._current_cookies = 0.0
-        self._current_time = 0.0
-        self._current_cps = 1.0
-        self._history = [(0.0, None, 0.0, 0.0)]
-        
-    def __str__(self):
-        """
-        Return human readable state
-        """
-        return " ".join(["\ntotal cookies:", str(self._total_cookies), 
-                         "\ncurrent cookies:", str(self._current_cookies), 
-                         "\ncurrent time:", str(self._current_time), 
-                         "\nCurrent CPS:", str(self._current_cps)])
-        
-    def get_cookies(self):
-        """
-        Return current number of cookies 
-        (not total number of cookies)
-        
-        Should return a float
-        """
-        return self._current_cookies
-    
-    def get_cps(self):
-        """
-        Get current CPS
-
-        Should return a float
-        """
-        return self._current_cps
-    
-    def get_time(self):
-        """
-        Get current time
-
-        Should return a float
-        """
-        return self._current_time
-    
-    def get_history(self):
-        """
-        Return history list
-
-        History list should be a list of tuples of the form:
-        (time, item, cost of item, total cookies)
-
-        For example: [(0.0, None, 0.0, 0.0)]
-
-        Should return a copy of any internal data structures,
-        so that they will not be modified outside of the class.
-        """
-        return self._history
-
-    def time_until(self, cookies):
-        """
-        Return time until you have the given number of cookies
-        (could be 0.0 if you already have enough cookies)
-
-        Should return a float with no fractional part
-        """
-        waittime = math.ceil((cookies - self._current_cookies) / self._current_cps)
-        if waittime > 0.0:
-            return waittime
-        else:
-            return 0.0
-    
-    def wait(self, time):
-        """
-        Wait for given amount of time and update state
-
-        Should do nothing if time <= 0.0
-        """
-        if time > 0:
-            self._total_cookies += self._current_cps * time
-            self._current_cookies += self._current_cps * time
-            self._current_time += time
-    
-    def buy_item(self, item_name, cost, additional_cps):
-        """
-        Buy an item and update state
-
-        Should do nothing if you cannot afford the item
-        """
-        if cost <= self._current_cookies:
-            self._history.append((self._current_time,
-                                  item_name,
-                                  cost,
-                                  self._total_cookies))
-            self._current_cookies -= cost
-            self._current_cps += additional_cps
-   
-    
-def simulate_clicker(build_info, duration, strategy):
-    """
-    Function to run a Cookie Clicker game for the given
-    duration with the given strategy.  Returns a ClickerState
-    object corresponding to the final state of the game.
-    """
-    build_info_clone = build_info.clone()
-    clickerstate = ClickerState()
-    while clickerstate.get_time() < duration:
-        choice = strategy(clickerstate.get_cookies(),
-                          clickerstate.get_cps(),
-                          clickerstate.get_history(),
-                          duration - clickerstate.get_time(),
-                          build_info_clone)
-        if choice == None:
-            clickerstate.wait(duration - clickerstate.get_time())
-        else:
-            if clickerstate.get_time() + clickerstate.time_until(build_info_clone.get_cost(choice)) <= duration:
-                clickerstate.wait(clickerstate.time_until(build_info_clone.get_cost(choice)))
-                clickerstate.buy_item(choice, build_info_clone.get_cost(choice), build_info_clone.get_cps(choice))
-                build_info_clone.update_item(choice)
-            else:
-                clickerstate.wait(duration - clickerstate.get_time())
-    while clickerstate.get_time() == duration:
-        choice = strategy(clickerstate.get_cookies(),
-                          clickerstate.get_cps(),
-                          clickerstate.get_history(),
-                          0,
-                          build_info_clone)
-        if choice == None:
-            break
-        else:
-            if build_info_clone.get_cost(choice) <= clickerstate.get_cookies():
-                clickerstate.buy_item(choice, build_info_clone.get_cost(choice), build_info_clone.get_cps(choice))
-                build_info_clone.update_item(choice)
-            else:
-                break
-
-    return clickerstate
-
-
-def strategy_cursor_broken(cookies, cps, history, time_left, build_info):
-    """
-    Always pick Cursor!
-
-    Note that this simplistic (and broken) strategy does not properly
-    check whether it can actually buy a Cursor in the time left.  Your
-    simulate_clicker function must be able to deal with such broken
-    strategies.  Further, your strategy functions must correctly check
-    if you can buy the item in the time left and return None if you
-    can't.
-    """
-    return "Cursor"
-
-def strategy_none(cookies, cps, history, time_left, build_info):
-    """
-    Always return None
-
-    This is a pointless strategy that will never buy anything, but
-    that you can use to help debug your simulate_clicker function.
-    """
-    return None
-
-def strategy_cheap(cookies, cps, history, time_left, build_info):
-    """
-    Always buy the cheapest item you can afford in the time left.
-    """
-    pricelist = {}
-    for item in build_info.build_items():
-        pricelist[build_info.get_cost(item)] = item
-    if build_info.get_cost(pricelist[min(pricelist)]) <= cookies + cps * time_left:
-        return pricelist[min(pricelist)]
-    else:
-        return None
-
-
-def strategy_expensive(cookies, cps, history, time_left, build_info):
-    """
-    Always buy the most expensive item you can afford in the time left.
-    """
-    pricelist = {}
-    fund = cookies + cps * time_left
-    for item in build_info.build_items():
-        if build_info.get_cost(item) <= fund:
-            pricelist[build_info.get_cost(item)] = item
-    if len(pricelist) > 0:
-        return pricelist[max(pricelist)]
-    else:
-        return None
-
-def strategy_best(cookies, cps, history, time_left, build_info):
-    """
-    The best strategy that you are able to implement.
-    """
-    pricelist = {}
-    cpslist = {}
-    for item in build_info.build_items():
-        pricelist[build_info.get_cost(item)] = item
-        cpslist[build_info.get_cps(item) / build_info.get_cost(item)] = item
-    if build_info.get_cost(pricelist[min(pricelist)]) <= cookies + cps * time_left:
-        # in order to get as many cookies as possible, at the beginning 1.5% and 
-        # at the end 30% of simulation time, choose the item with lowest price,
-        # other time choose the item with highest cps/cost
-        if time_left > SIM_TIME / 100 * 98.5 or time_left < SIM_TIME / 100 * 30:
-            return pricelist[min(pricelist)]
-        else:
-            return cpslist[max(cpslist)]
-    else:
-        return None
-        
-def run_strategy(strategy_name, time, strategy):
-    """
-    Run a simulation for the given time with one strategy.
-    """
-    state = simulate_clicker(provided.BuildInfo(), time, strategy)
-    print strategy_name, ":", state
-
-    # Plot total cookies over time
-
-    # Uncomment out the lines below to see a plot of total cookies vs. time
-    # Be sure to allow popups, if you do want to see it
-
-    # history = state.get_history()
-    # history = [(item[0], item[3]) for item in history]
-    # simpleplot.plot_lines(strategy_name, 1000, 400, 'Time', 'Total Cookies', [history], True)
-
-def run():
-    """
-    Run the simulator.
-    """    
-    run_strategy("Cursor", SIM_TIME, strategy_cursor_broken)
-
-    # Add calls to run_strategy to run additional strategies
-    run_strategy("Cheap", SIM_TIME, strategy_cheap)
-    run_strategy("Expensive", SIM_TIME, strategy_expensive)
-    run_strategy("Best", SIM_TIME, strategy_best)
-    
-run()
-    
-
-```
