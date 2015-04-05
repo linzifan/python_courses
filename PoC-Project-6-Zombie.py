@@ -33,7 +33,7 @@ class Zombie(poc_grid.Grid):
         if obstacle_list != None:
             for cell in obstacle_list:
                 self.set_full(cell[0], cell[1])
-            self._obstacle_list = obstacle_list
+            self._obstacle_list = list(obstacle_list)
         else:
             self._obstacle_list = []
         if zombie_list != None:
@@ -144,20 +144,18 @@ class Zombie(poc_grid.Grid):
         """
         temp_human_list = []
         for human in self.humans():
-            neighbors = self.eight_neighbors(human[0], human[1])
-            # store current position
+            neighbors = self.eight_neighbors(human[0], human[1]) # human - 8 neighbors
             distance = [zombie_distance[human[0]][human[1]]]
             location = [human]
             
             for resident in neighbors:
-                if self.is_empty(resident[0], resident[1]):
-                    # and store rest of 8 other positions if not occupied
+                if self.is_empty(resident[0], resident[1]):                    
                     distance.append(zombie_distance[resident[0]][resident[1]])
-                    location.append(resident)
-            # find the current safest location, move there        
-            safest = location[distance.index(max(distance))]          
+                    location.append(resident)                   
+            
+            move = location[distance.index(max(distance))]          
             self.set_empty(human[0], human[1])
-            temp_human_list.append(safest)
+            temp_human_list.append(move)
             
         self._human_list = temp_human_list
 
@@ -168,22 +166,19 @@ class Zombie(poc_grid.Grid):
         are allowed
         """
         temp_zombie_list = []
-        #for zombie in self.zombies():
         for zombie in self._zombie_list:
-            neighbors = self.four_neighbors(zombie[0], zombie[1])
-            # store current position
+            neighbors = self.four_neighbors(zombie[0], zombie[1]) # zombie - 4 neighbors
             distance = [human_distance[zombie[0]][zombie[1]]]
             location = [zombie]
             
             for resident in neighbors:
                 if self.is_empty(resident[0], resident[1]):
-                    # and store rest of 4 other positions if not occupied
                     distance.append(human_distance[resident[0]][resident[1]])
                     location.append(resident)
-            # find the current most closest location, move there  
-            closest = location[distance.index(min(distance))]          
+              
+            move = location[distance.index(min(distance))]          
             self.set_empty(zombie[0], zombie[1])
-            temp_zombie_list.append(closest)
+            temp_zombie_list.append(move)
             
         self._zombie_list = temp_zombie_list
         
@@ -191,4 +186,5 @@ class Zombie(poc_grid.Grid):
 # before this will work without errors
 
 # poc_zombie_gui.run_gui(Zombie(30, 40))
+
 
