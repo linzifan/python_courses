@@ -1,0 +1,185 @@
+---
+title: "PoC-Project y"
+author: "Zifan Lin"
+date: ""
+output: html_document
+---
+
+## Word Wrangler
+
+### Overview
+
+In this mini-project we will create a simple word game. The game will take an input word and then generate all valid words that can be created using the letters in the input word. You will then play the game by guessing all of the words. The objective of this mini-project is to work with ordered lists and recursion. While it is possible to write the functions in other ways, we strongly encourage you to follow the spirit of the mini-project. The only way to become more comfortable with recursion is to write recursive functions!
+
+We have provided a working GUI and a class to manage the state of the game. You will be responsible for writing several helper functions. These functions will be used by the provided code in order to build the list of valid words that are composed of letters from the input word. The provided [template](http://www.codeskulptor.org/#poc_wrangler_template.py) includes the stubs for the functions that you will need to implement for this mini-project.
+
+### Phase One
+
+You should first write the functions `remove_duplicates(list1)` and `intersect(list1, list2)`. These functions can both be written iteratively (using loops, not recursion). All of the arguments to these functions are lists in ascending order. Both functions should return new sorted lists.
+
+- `remove_duplicates` should return a new sorted list with the same elements as the input, `list1`, but without any duplicate elements.
+- `intersect` should return a new sorted list that contains only the elements that are in both input lists, `list1` and `list2`.
+
+Remember that the input lists will already be sorted. You should exploit this fact to make these functions simpler to write than if you had to handle arbitrary lists.
+
+### Phase Two
+
+You should next implement merge sorting. To do so, you will need to write two functions, `merge(list1, list2)` and `merge_sort(list1)`. The input lists to `merge` will both be lists in ascending order. The input to `merge_sort` will be an unsorted list. While you could write `merge` recursively, you should write it iteratively because it will generate too many recursive calls for reasonably sized lists. However, you must write `merge_sort` recursively.
+
+- `merge` should return a new sorted list that contains all of the elements in either `list1` and `list2`.
+- `merge_sort` should return a new sorted list that contains all of the elements in `list1` sorted in ascending order.
+
+Again, remember that the input lists to `merge` will already be sorted. You should exploit this fact to make it simpler to write. Further, `merge_sort` should use merge to help sort the list!
+
+### Phase Three
+
+Now, you should implement `gen_all_strings(word)`. This function is the heart of the word wrangler game. It takes a string as input and returns a list of strings. It should return all possible strings that can be constructed from the letters in the input `word`. More formally, it should return all strings of length 0 to `len(word)` that can be composed of the letters that occur in `word,` in any order. Further, each letter should be considered distinct, so if the same letter appears twice in the word, then the output will have duplicate strings.
+
+For example, if `word` is `"aab"`, `gen_all_strings` would return `["", "b", "a", "ab", "ba", "a", "ab", "ba", "aa", "aa", "aab", "aab", "aba", "aba", "baa", "baa"]`. Notice that the string `"aa"` appears twice in the output. This is because each `a` is considered distinct, so these two strings correspond to the two different orderings of the two `a` letters in the input word. Note that it does not matter in what order the strings appear in the list. The functions you have already written will be used afterwards to sort and remove duplicates from the final lists (you should not do this within `gen_all_strings`).
+
+Note that this function is similar (but not identical) to something that you have previously written in this course. This time, however, ordering of the output list is not important, duplicates are allowed, and you must write it recursively. The basic idea is as follows:
+
+1. Split the input `word` into two parts: the first character (`first`) and the remaining part (`rest`).
+2. Use `gen_all_strings` to generate all appropriate strings for `rest`. Call this list `rest_strings`.
+3. For each string in `rest_strings`, generate new strings by inserting the initial character, `first`, in all possible positions within the string.
+4. Return a list containing the strings in `rest_strings` as well as the new strings generated in step 3.
+
+This is a rough outline of one approach that will allow you to generate all strings that can be composed from the letters of word. 
+
+
+
+### Submission
+
+[Owltest page](http://codeskulptor.appspot.com/owltest?urlTests=poc.poc_wrangler_tests.py&urlPylintConfig=poc.pylint_config_wrangler.py&imports=%7Bpoc:(poc_wrangler_provided)%7D)
+
+```{r test-python, eval=FALSE, engine='python'}
+"""
+Student code for Word Wrangler game
+"""
+
+import urllib2
+import codeskulptor
+import poc_wrangler_provided as provided
+
+WORDFILE = "assets_scrabble_words3.txt"
+
+
+# Functions to manipulate ordered word lists
+
+def remove_duplicates(list1):
+    """
+    Eliminate duplicates in a sorted list.
+
+    Returns a new sorted list with the same elements in list1, but
+    with no duplicates.
+
+    This function can be iterative.
+    """
+    res = []
+    for item in list1:
+        if item not in res:
+            res.append(item)
+    return res
+
+def intersect(list1, list2):
+    """
+    Compute the intersection of two sorted lists.
+
+    Returns a new sorted list containing only elements that are in
+    both list1 and list2.
+
+    This function can be iterative.
+    """
+    res = []
+    for item in list1:
+        if item in list2 and item not in res:
+            res.append(item)
+    return res
+
+# Functions to perform merge sort
+
+def merge(list1, list2):
+    """
+    Merge two sorted lists.
+
+    Returns a new sorted list containing all of the elements that
+    are in either list1 and list2.
+
+    This function can be iterative.
+    """  
+    res = []
+    lst1, lst2 = list1[:], list2[:]
+    while len(lst1) > 0 and len(lst2) > 0:
+        if lst1[0] < lst2[0]:
+            res.append(lst1[0])
+            lst1.pop(0)
+        else:
+            res.append(lst2[0])
+            lst2.pop(0)
+    if len(lst1) > 0:
+        res += lst1
+    else:
+        res += lst2
+    return res
+                
+def merge_sort(list1):
+    """
+    Sort the elements of list1.
+
+    Return a new sorted list with the same elements as list1.
+
+    This function should be recursive.
+    """
+    if len(list1) <= 1:
+        return list1
+    half_ind = len(list1) / 2
+    return merge(merge_sort(list1[:half_ind]), merge_sort(list1[half_ind:]))
+    
+
+# Function to generate all strings for the word wrangler game
+
+def gen_all_strings(word):
+    """
+    Generate all strings that can be composed from the letters in word
+    in any order.
+
+    Returns a list of all strings that can be formed from the letters
+    in word.
+
+    This function should be recursive.
+    """
+    if len(word) == 0:
+        return [""]
+    first = word[0]
+    rest = word[1:]
+    rest_strings = gen_all_strings(rest)
+    answer = []
+    for item in rest_strings:
+        for ind in range(len(item) + 1):
+            answer.append(item[:ind] + first + item[ind:])
+    return rest_strings + answer
+
+# Function to load words from a file
+
+def load_words(filename):
+    """
+    Load word list from the file named filename.
+
+    Returns a list of strings.
+    """
+    return []
+
+def run():
+    """
+    Run game.
+    """
+    words = load_words(WORDFILE)
+    wrangler = provided.WordWrangler(words, remove_duplicates, 
+                                     intersect, merge_sort, 
+                                     gen_all_strings)
+    provided.run_game(wrangler)
+
+# Uncomment when you are ready to try the game
+# run()
+
+```
