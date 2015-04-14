@@ -29,5 +29,6 @@ All projects presented here are from [Rice University online courses](https://ww
 #### Principles of Computing (Part 2)
 - Mini-Project 6: [Zombie Apocalypse (BFS)](http://linzifan.github.io/python_courses/PoC-Project6)
 - Mini-Project 7: [Word Wrangler](http://linzifan.github.io/python_courses/PoC-Project7)
+- Mini-Project 8: [Tic-Tac-Toe (Minimax)](http://linzifan.github.io/python_courses/PoC-Project8)
 
 [Index](http://linzifan.github.io/python_courses/Index)
