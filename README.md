@@ -13,7 +13,7 @@ All projects presented here are from [Rice University online courses](https://ww
 - Mini-Project 5: [Memory](http://linzifan.github.io/python_courses/IPP-Project5)
 - Mini-Project 6: [Blackjack](http://linzifan.github.io/python_courses/IPP-Project6)
 - Mini-Project 7: [Spaceship](http://linzifan.github.io/python_courses/IPP-Project7)
-- 
+
 
 #### Principles of Computing (Part 1)
 - Mini-Project 1: [2048 (Merge)](http://linzifan.github.io/python_courses/PoC-Project1)
