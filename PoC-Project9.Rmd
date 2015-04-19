@@ -1,0 +1,310 @@
+---
+title: "PoC-Project 9"
+author: "Zifan Lin"
+date: ""
+output: html_document
+---
+
+## The Fifteen Puzzle
+
+### Overview
+
+This week's homework introduced you to the Fifteen puzzle and outlined the highlights of building a solver for the puzzle. As described in the homework, the solution process for a puzzle of size $m \tiems n$ has three phases:
+
+1. Solve the bottom $m ??? 2$ rows of the puzzle in a row by row manner from bottom to top. Each individual row will be solved in a right to left order.
+2. Solve the rightmost $n ??? 2$ columns of the top two rows of the puzzle (in a right to left order). Each column consists of two unsolved positions and will be solved in a bottom to top order.
+3. Solve the upper left $2 \times 2$ portion of the puzzle directly.
+
+As noted in the homework, we have provided a program [template](http://www.codeskulptor.org/#poc_fifteen_template.py) that includes a partially implemented `Puzzle` class that allows you to interact with a GUI designed to simulate the Fifteen puzzle. Your task for this mini-project is to write a collection of `Puzzle` methods that implement each phase of the solution process. Several of these methods will correspond to invariants designed to help guide you towards a correct implementation of the solver. The remaining methods are solution methods for portions of the puzzle. Note that each of these solution methods updates the puzzle and returns the move string associated with this update.
+
+
+### Phase one
+
+In this phase, your task is to implement three methods: one invariant method and two solution methods. The invariant method for this phase (as described in the problem #6 of the homework) is `lower_row_invariant(i, j)`. This method should return `True` if the following three conditions are all true:
+
+- Tile zero is positioned at $(i,j)$.
+- All tiles in rows $i + 1$ or below are positioned at their solved location.
+- All tiles in row $i$ to the right of position $(i,j)$ are positioned at their solved location.
+
+The image below shows a $4 \times 4$ puzzle for which `lower_row_invariant(2, 2)` is true with tile zero in position $(2,2)$ and the blue tiles all in their solved positions.
+
+![Alt text](http://storage.googleapis.com/codeskulptor-poc/poc_fifteen_inv1.png)
+
+We again remind you that you should implement and fully test `lower_row_invariant` before proceeding. In particular, we suggest that you test this method using OwlTest to confirm that your implementation of this method is correct before proceeding. 
+
+Next, you will implement the two solution methods for this phase: `solve_interior_tile` and `solve_col0_tile`.
+
+The method `solve_interior_tile(i, j)` is designed to solve the puzzle at position $(i,j)$ where $i>1$ and $j>0$. Specifically, this method takes a puzzle for which `lower_row_invariant(i, j)` is true and repositions the tiles in the puzzle such that `lower_row_invariant(i, j - 1)` is true. To implement `solve_interior_tile`, we suggest that you review problem #8 on the homework.
+
+The second solution method `solve_col0_tile(i)` is designed to solve the puzzle at position $(i,0)$ where $i>1$. Specifically, this method takes a puzzle that satisfies the invariant `lower_row_invariant(i, 0)` and repositions the tiles in the puzzle such that `lower_row_invariant(i - 1, n - 1)` is true where $n$ is the width of the grid. Implementing `solve_col0_tile` is trickier than `solve_interior_tile` since the solution strategy for `solve_interior_tile(i, j)` involved moving tile zero through column $j???1$. In the case of the left column where $j=0$, this solution process is not feasible.
+
+Our recommended strategy for `solve_col0_tile` is to move the zero tile from $(i,0)$ to $(i???1,1)$ using the move string `"ur"`. If you are lucky and the target tile (i.e, the tile being solved for) is now at position $(i,0)$, you can simply move tile zero to the end of row $i???1$ and be done. However, if the target tile is not positioned at $(i,0)$, we suggest the following solution strategy:
+
+- Reposition the target tile to position $(i???1,1)$ and the zero tile to position $(i???1,0)$ using a process similar to that of `solve_interior_tile`,
+- Then apply the move string for a $3 \times 2$ puzzle as described in problem #9 of the homework to bring the target tile into position $(i,0)$,
+- Finally, conclude by moving tile zero to the right end of row $i???1$.
+
+Note the process for the first step is so similar to that of `solve_interior_tile` that you may wish to refactor your implementation to include a helper method `position_tile` that is used by both tasks.
+
+Note that the invariant method `lower_row_invariant` can be extremely valuable as you test and debug `solve_interior_tile` and `solve_col0_tile`. Minimally, we recommend that you add `assert` statements to your solution methods that verify that these methods are receiving a puzzle in a proper input configuration and producing a puzzle with the proper output configuration. Once you are confident that these methods are correct, use OwlTest to confirm that they are correct.
+
+
+### Phase two
+In phase two, you will solve the rightmost $n???2$ columns of the remaining two rows, one column at a time from right to left. Your task is to implement four methods: two invariant methods and two solution methods. We recommend that you implement the two invariant methods `row1_invariant(j)` and `row0_invariant(j)` first. These invariants check whether the solution process has proceeded correctly to positions $(1,j)$ and $(0,j)$, respectively.
+
+The invariant `row1_invariant(j)` should check whether tile zero is at $(1,j)$ and whether all positions either below or to the right of this position are solved. The invariant `row0_invariant(j)` checks a similar condition, but additionally checks whether position $(1,j)$ is also solved. The images below show a pair of puzzles for which `row1_invariant(2)` and `row0_invariant(2)` are true:
+
+![Alt text](http://storage.googleapis.com/codeskulptor-poc/poc_fifteen_inv2.png)
+![Alt text](http://storage.googleapis.com/codeskulptor-poc/poc_fifteen_inv3.png)
+
+Once these two invariant methods are implemented correctly, you should implement corresponding solution methods `solve_row1_tile(j)` and `solve_row0_tile(j)`. These methods should solve for the tiles at positions $(1,j)$ and $(0,j)$, respectively. These solution methods are related to the invariant methods in a manner similar to that of problem #7 on the homework. In particular, the annotated execution trace for the solver should have the form:
+
+```
+...
+assert my_puzzle.row1_invariant(j)
+my_puzzle.solve_row1_tile(j)
+assert my_puzzle.row0_invariant(j)
+my_puzzle.solve_row0_tile(j)
+assert my_puzzle.row1_invariant(j - 1)
+...
+```
+
+where `my_puzzle` is the name of the puzzle being solved.
+
+Implementing `solve_row1_tile(j)` should be straightforward using a method similar to that of `solve_interior_tile` (or using your helper method `position_tile`). To implement `solve_row0_tile(j)`, we suggest that you use a method similar to that for `solve_col0_tile`. In particular, you should move the zero tile from position $(0,j)$ to $(1,j???1)$ using the move string `"ld"` and check whether target tile is at position $(0,j)$. If not, reposition the target tile to position $(1,j???1)$ with tile zero in position $(1,j???2)$. At this point, you can apply the move string from problem #10 in the homework to complete the method.
+
+Again, we recommend that you add $assert$ statements to your solution methods that verify that the methods are receiving a puzzle in a proper input configuration and producing a puzzle with the proper output configuration. Once you are confident that these methods are correct, use OwlTest to confirm that they are correct.
+
+
+
+### Phase three
+
+You are now ready to implement phase three and complete the mini-project. For this final phase, your task is to implement two solution methods: `solve_2x2()` and `solve_puzzle()`. The method `solve_2x2()` solves the final upper left $2 \times 2$ portion of the puzzle under the assumption that the remainder of the puzzle is solved (i.e, `row1_invariant(1)` is true). We recommend that you consult problems #3-5 in the homework for a suggested method.
+
+When building test cases for your solver, note that not all puzzles generated by random placement of the tiles can be solved. For larger puzzles, everything but the upper left $2 \times 2$ portion of the puzzle can always be solved. To test this $2 \times 2$ portion of the solver, we recommend that you build your tests by applying a sequence of random moves to an unscrambled puzzle.
+
+The final method `solve_puzzle()` takes a solvable `Puzzle` object and solves the puzzle. This method should call the various solution methods that you have implemented and join the move string returned by these methods to form a single move string that solves the entire puzzle. Observe the invariants associated with these solution methods link together to guarantee that each solution method receives the puzzle in the configuration necessary for the solution process. (Note that on the transition from phase one to phase two, the invariants `lower_row_invariant(1, n - 1)` and `row1_invariant(n - 1)` are identical.)
+
+`solve_puzzle` should update the puzzle and return a solution string. Once you have implemented this method, clicking the "Solve" button in the GUI will call your solver to solve the puzzle.
+
+
+
+
+### Submission
+
+[Owltest page](http://codeskulptor.appspot.com/owltest?urlTests=poc.poc_fifteen_tests.py&urlPylintConfig=poc.pylint_config.py&imports=%7Bpoc:(poc_fifteen_gui)%7D)
+
+```{r test-python, eval=FALSE, engine='python'}
+"""
+Loyd's Fifteen puzzle - solver and visualizer
+Note that solved configuration has the blank (zero) tile in upper left
+Use the arrows key to swap this tile with its neighbors
+"""
+
+import poc_fifteen_gui
+
+class Puzzle:
+    """
+    Class representation for the Fifteen puzzle
+    """
+
+    def __init__(self, puzzle_height, puzzle_width, initial_grid=None):
+        """
+        Initialize puzzle with default height and width
+        Returns a Puzzle object
+        """
+        self._height = puzzle_height
+        self._width = puzzle_width
+        self._grid = [[col + puzzle_width * row
+                       for col in range(self._width)]
+                      for row in range(self._height)]
+
+        if initial_grid != None:
+            for row in range(puzzle_height):
+                for col in range(puzzle_width):
+                    self._grid[row][col] = initial_grid[row][col]
+
+    def __str__(self):
+        """
+        Generate string representaion for puzzle
+        Returns a string
+        """
+        ans = ""
+        for row in range(self._height):
+            ans += str(self._grid[row])
+            ans += "\n"
+        return ans
+
+    #####################################
+    # GUI methods
+
+    def get_height(self):
+        """
+        Getter for puzzle height
+        Returns an integer
+        """
+        return self._height
+
+    def get_width(self):
+        """
+        Getter for puzzle width
+        Returns an integer
+        """
+        return self._width
+
+    def get_number(self, row, col):
+        """
+        Getter for the number at tile position pos
+        Returns an integer
+        """
+        return self._grid[row][col]
+
+    def set_number(self, row, col, value):
+        """
+        Setter for the number at tile position pos
+        """
+        self._grid[row][col] = value
+
+    def clone(self):
+        """
+        Make a copy of the puzzle to update during solving
+        Returns a Puzzle object
+        """
+        new_puzzle = Puzzle(self._height, self._width, self._grid)
+        return new_puzzle
+
+    ########################################################
+    # Core puzzle methods
+
+    def current_position(self, solved_row, solved_col):
+        """
+        Locate the current position of the tile that will be at
+        position (solved_row, solved_col) when the puzzle is solved
+        Returns a tuple of two integers        
+        """
+        solved_value = (solved_col + self._width * solved_row)
+
+        for row in range(self._height):
+            for col in range(self._width):
+                if self._grid[row][col] == solved_value:
+                    return (row, col)
+        assert False, "Value " + str(solved_value) + " not found"
+
+    def update_puzzle(self, move_string):
+        """
+        Updates the puzzle state based on the provided move string
+        """
+        zero_row, zero_col = self.current_position(0, 0)
+        for direction in move_string:
+            if direction == "l":
+                assert zero_col > 0, "move off grid: " + direction
+                self._grid[zero_row][zero_col] = self._grid[zero_row][zero_col - 1]
+                self._grid[zero_row][zero_col - 1] = 0
+                zero_col -= 1
+            elif direction == "r":
+                assert zero_col < self._width - 1, "move off grid: " + direction
+                self._grid[zero_row][zero_col] = self._grid[zero_row][zero_col + 1]
+                self._grid[zero_row][zero_col + 1] = 0
+                zero_col += 1
+            elif direction == "u":
+                assert zero_row > 0, "move off grid: " + direction
+                self._grid[zero_row][zero_col] = self._grid[zero_row - 1][zero_col]
+                self._grid[zero_row - 1][zero_col] = 0
+                zero_row -= 1
+            elif direction == "d":
+                assert zero_row < self._height - 1, "move off grid: " + direction
+                self._grid[zero_row][zero_col] = self._grid[zero_row + 1][zero_col]
+                self._grid[zero_row + 1][zero_col] = 0
+                zero_row += 1
+            else:
+                assert False, "invalid direction: " + direction
+
+    ##################################################################
+    # Phase one methods
+
+    def lower_row_invariant(self, target_row, target_col):
+        """
+        Check whether the puzzle satisfies the specified invariant
+        at the given position in the bottom rows of the puzzle (target_row > 1)
+        Returns a boolean
+        """
+        # replace with your code
+        return False
+
+    def solve_interior_tile(self, target_row, target_col):
+        """
+        Place correct tile at target position
+        Updates puzzle and returns a move string
+        """
+        # replace with your code
+        return ""
+
+    def solve_col0_tile(self, target_row):
+        """
+        Solve tile in column zero on specified row (> 1)
+        Updates puzzle and returns a move string
+        """
+        # replace with your code
+        return ""
+
+    #############################################################
+    # Phase two methods
+
+    def row0_invariant(self, target_col):
+        """
+        Check whether the puzzle satisfies the row zero invariant
+        at the given column (col > 1)
+        Returns a boolean
+        """
+        # replace with your code
+        return False
+
+    def row1_invariant(self, target_col):
+        """
+        Check whether the puzzle satisfies the row one invariant
+        at the given column (col > 1)
+        Returns a boolean
+        """
+        # replace with your code
+        return False
+
+    def solve_row0_tile(self, target_col):
+        """
+        Solve the tile in row zero at the specified column
+        Updates puzzle and returns a move string
+        """
+        # replace with your code
+        return ""
+
+    def solve_row1_tile(self, target_col):
+        """
+        Solve the tile in row one at the specified column
+        Updates puzzle and returns a move string
+        """
+        # replace with your code
+        return ""
+
+    ###########################################################
+    # Phase three methods
+
+    def solve_2x2(self):
+        """
+        Solve the upper left 2x2 part of the puzzle
+        Updates the puzzle and returns a move string
+        """
+        # replace with your code
+        return ""
+
+    def solve_puzzle(self):
+        """
+        Generate a solution string for a puzzle
+        Updates the puzzle and returns a move string
+        """
+        # replace with your code
+        return ""
+
+# Start interactive simulation
+poc_fifteen_gui.FifteenGUI(Puzzle(3, 2))
+
+
+```
