@@ -1,0 +1,344 @@
+---
+title: "IPP-Project 8"
+author: "Zifan Lin"
+date: ""
+output: html_document
+---
+
+## RiceRocks (Asteroids)
+
+For our last mini-project, we will complete the implementation of RiceRocks, an updated version of Asteroids,  that we began last week.  You may start with either your code or the program [template](http://www.codeskulptor.org/#examples-ricerocks_template.py) which includes a full implementation of Spaceship and will be released immediately after the deadline for the Spaceship mini-project (by making the preceding link live).  If you start with your own code, you should add the splash screen image that you dismiss with a mouse click before starting this mini-project.  We strongly recommend using Chrome for this mini-project since Chrome's superior performance will become apparent when your program attempts to draw dozens of sprites.
+
+
+### Mini-project development process
+
+At the end of this project, your game will have multiple rocks and multiple missiles.  You will lose a life if your ship collides with a rock and you will score points if your missile collides with a rock. You will keep track of the score and lives remaining and end the game at the proper time.  You may optionally add animated explosions when there is a collision.
+
+##### Phase one - Multiple Rocks
+
+For this phase, you will keep a set of rocks and spawn new rocks into this set.  This requires the following steps:
+
+1. Remove `a_rock` and replace it with `rock_group`. Initialize the rock group to an empty set. Modify your rock spawner to create a new rock (an instance of a Sprite object) and add it to `rock_group`.
+2. Modify your rock spawner to limit the total number of rocks in the game at any one time. We suggest you limit it to 12. With too many rocks the game becomes less fun and the animation slows down significantly.
+3. Create a helper function `process_sprite_group`. This function should take a set and a canvas and call the update and draw methods for each sprite in the group.
+4. Call the `process_sprite_group` function on `rock_group` in the draw handler.
+
+
+##### Phase two - Collisions
+
+For this phase, you will detect collisions between the ship and a rock. Upon a collision, the rock should be destroyed and the player should lose a life. To implement ship-rock collisions, you need to do the following:
+
+1. Add a `collide` method to the Sprite class. This should take an `other_object` as an argument and return `True` if there is a collision or `False` otherwise. For now, this other object will always be your ship, but we want to be able to use this collide method to detect collisions with missiles later, as well. Collisions can be detected using the radius of the two objects. This requires you to implement methods `get_position` and `get_radius` on both the Sprite and Ship classes.
+2. Implement a `group_collide` helper function. This function should take a set `group` and a sprite `other_object` and check for collisions between `other_object` and elements of the group. If there is a collision, the colliding object should be removed from the group. To avoid removing an object from a set that you are iterating over (which can cause you a serious debugging headache), iterate over a copy of the set created via `set(group)`. This function should return `True` or `False` depending on whether there was a collision. Be sure to use the `collide` method from part 1 on the sprites in the group to accomplish this task.
+3. In the draw handler, use the `group_collide` helper to determine if the ship hit any of the rocks. If so, decrease the number of lives by one. Note that you could have negative lives at this point. Don't worry about that yet.
+
+At this point, you should have a game of "dodge 'em". You can fly around trying to avoid the rocks!
+
+
+##### Phase three - Missiles
+
+For this phase, you will keep a set of missiles and spawn new missiles into this set when firing using the space bar. This requires the following steps:
+
+1. Remove `a_missile` and replace it with `missile_group`.  Initialize the missile group to an empty set.  Modify your shoot method of `my_ship` to create a new missile (an instance of the Sprite class) and add it to the `missile_group`. If you use our code, the firing sound should play automatically each time a missile is spawned.
+2. In the draw handler, use your helper function `process_sprite_group` to process `missile_group`. While you can now shoot multiple missiles, you will notice that they stick around forever. To fix this, we need to modify the Sprite class and the `process_sprite_group` function.
+3. In the `update` method of the Sprite class, increment the age of the sprite every time `update` is called. If the age is greater than or equal to the lifespan of the sprite, then we want to remove it. So, return `False` (meaning we want to keep it) if the age is less than the lifespan and `True` (meaning we want to remove it) otherwise.
+4. Modify `process_sprite_group` to check the return value of `update` for sprites. If it returns `True`, remove the sprite from the group. Again, you will want to iterate over a copy of the sprite group in `process_sprite_group` to avoid deleting from the same set over which you are iterating.
+
+
+##### Phase four - Collisions Revisited
+
+Now, we want to destroy rocks when they are hit by a missile. We can't quite use `group_collide`, because we want to check for collisions between two groups. All we need to do is add one more helper function:
+
+1. Implement a final helper function `group_group_collide` that takes two groups of objects as input. `group_group_collide` should iterate through the elements of a copy of the first group using a `for`-loop and then call `group_collide` with each of these elements on the second group. `group_group_collide` should return the number of elements in the first group that collide with the second group as well as delete these elements in the first group. You may find the `discard` method for sets to be helpful here.
+2. Call `group_group_collide` in the draw handler to detect missile/rock collisions. Increment the score by the number of missile collisions.
+
+
+##### Phase five - Finish it off
+
+You now have a mostly working version of RiceRocks!!! Let's add a few final touches.
+
+1. Add code to the draw handler such that, if the number of lives becomes 0, the game is reset and the splash screen appears. In particular, set the flag `started` to `False`, destroy all rocks and prevent any more rocks for spawning until the game is restarted.
+2. When the game starts/restarts, make sure the lives and the score are properly initialized. Start spawning rocks. Play/restart the background music loaded in the variable `soundtrack` in the program template.
+3. When you spawn rocks, you want to make sure they are some distance away from the ship. Otherwise, you can die when a rock spawns on top of you, which isn't much fun. One simple way to achieve this effect to ignore a rock spawn event if the spawned rock is too close to the ship.
+4. Experiment with varying the velocity of rocks based on the score to make game play more difficult as the game progresses.
+5. Tweak any constants that you have to make the game play the way you want.
+
+Congratulations! You have completed the assignment. Enjoy playing your game!!!
+
+
+##### Bonus
+
+The following will not be graded. Feel free to try this, but do not break any of the other game functionality. We strongly recommend that you save your work before doing this and keep track of it, so you can submit a working version of the first five phases if you end up breaking your game trying to add more features.
+
+One thing that is missing in your game is explosions when things collide. We have provided a tiled explosion image that you can use to create animated explosions. To get things working, you will need to do a few things:
+
+1. In the draw method of the Sprite class, check if `self.animated` is `True`. If so, then choose the correct tile in the image based on the age. The image is tiled horizontally. If `self.animated` is `False`, it should continue to draw the sprite as before.
+2. Create an `explosion_group` global variable and initialize it to an empty set.
+3. In `group_collide`, if there is a collision, create a new explosion (an instance of the Sprite class)and add it to the `explosion_group`. Make sure that each explosion plays the explosion sound.
+4. In the draw handler, use `process_sprite_group` to process `explosion_group`.
+
+
+You should now have explosions working!
+
+
+
+### Grading Rubric - 13 pts total (scaled to 100 pts)
+
+- 1 pt - The program spawns multiple rocks.
+- 1 pt - The program correctly determines whether the ship collides with a rock.
+- 1 pt - The program removes a rock when the ship collides with a rock.
+- 1 pt - The number of lives decreases by one when the ship collides with a rock.
+- 1 pt - The program spawns multiple missiles.
+- 1 pt - The program plays the firing sound when each missile is spawned.
+- 1 pt - The program removes a missile that does not collide with a rock after some fixed time period.
+- 1 pt - The program correctly determines whether a missile and a rock collide.
+- 1 pt - The program removes missiles and rocks that collide.
+- 1 pt - The score is updated appropriately after missile/rock collisions.
+- 1 pt - When the lives go to zero, the splash screen reappears and all rocks are removed.
+- 1 pt - When the splash screen is clicked, the lives are reset to 3, score is reset to zero and the background music restarts.
+- 1 pt - The game spawns rocks only when the splash screen is not visible and a game is in progress.
+
+### Submission
+```{r test-python, eval=FALSE, engine='python'}
+# program template for Spaceship
+import simplegui
+import math
+import random
+
+# globals for user interface
+WIDTH = 800
+HEIGHT = 600
+score = 0
+lives = 3
+time = 0.5
+
+class ImageInfo:
+    def __init__(self, center, size, radius = 0, lifespan = None, animated = False):
+        self.center = center
+        self.size = size
+        self.radius = radius
+        if lifespan:
+            self.lifespan = lifespan
+        else:
+            self.lifespan = float('inf')
+        self.animated = animated
+
+    def get_center(self):
+        return self.center
+
+    def get_size(self):
+        return self.size
+
+    def get_radius(self):
+        return self.radius
+
+    def get_lifespan(self):
+        return self.lifespan
+
+    def get_animated(self):
+        return self.animated
+
+    
+# art assets created by Kim Lathrop, may be freely re-used in non-commercial projects, please credit Kim
+    
+# debris images - debris1_brown.png, debris2_brown.png, debris3_brown.png, debris4_brown.png
+#                 debris1_blue.png, debris2_blue.png, debris3_blue.png, debris4_blue.png, debris_blend.png
+debris_info = ImageInfo([320, 240], [640, 480])
+debris_image = simplegui.load_image("http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/debris2_blue.png")
+
+# nebula images - nebula_brown.png, nebula_blue.png
+nebula_info = ImageInfo([400, 300], [800, 600])
+nebula_image = simplegui.load_image("http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/nebula_blue.f2014.png")
+
+# splash image
+splash_info = ImageInfo([200, 150], [400, 300])
+splash_image = simplegui.load_image("http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/splash.png")
+
+# ship image
+ship_info = ImageInfo([45, 45], [90, 90], 35)
+ship_image = simplegui.load_image("http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/double_ship.png")
+
+# missile image - shot1.png, shot2.png, shot3.png
+missile_info = ImageInfo([5,5], [10, 10], 3, 50)
+missile_image = simplegui.load_image("http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/shot2.png")
+
+# asteroid images - asteroid_blue.png, asteroid_brown.png, asteroid_blend.png
+asteroid_info = ImageInfo([45, 45], [90, 90], 40)
+asteroid_image = simplegui.load_image("http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/asteroid_blue.png")
+
+# animated explosion - explosion_orange.png, explosion_blue.png, explosion_blue2.png, explosion_alpha.png
+explosion_info = ImageInfo([64, 64], [128, 128], 17, 24, True)
+explosion_image = simplegui.load_image("http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/explosion_alpha.png")
+
+# sound assets purchased from sounddogs.com, please do not redistribute
+soundtrack = simplegui.load_sound("http://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/soundtrack.mp3")
+missile_sound = simplegui.load_sound("http://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/missile.mp3")
+missile_sound.set_volume(.5)
+ship_thrust_sound = simplegui.load_sound("http://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/thrust.mp3")
+explosion_sound = simplegui.load_sound("http://commondatastorage.googleapis.com/codeskulptor-assets/sounddogs/explosion.mp3")
+
+# helper functions to handle transformations
+def angle_to_vector(ang):
+    return [math.cos(ang), math.sin(ang)]
+
+def dist(p,q):
+    return math.sqrt((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2)
+
+
+# Ship class
+class Ship:
+    def __init__(self, pos, vel, angle, image, info):
+        self.pos = [pos[0],pos[1]]
+        self.vel = [vel[0],vel[1]]
+        self.thrust = False
+        self.angle = angle
+        self.angle_vel = 0
+        self.image = image
+        self.image_center = info.get_center()
+        self.image_size = info.get_size()
+        self.radius = info.get_radius()
+        
+    def draw(self,canvas):
+        if self.thrust:
+            self.image_center[0] = 135
+        else:
+            self.image_center[0] = 45
+        canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
+
+    def update(self):
+        self.vel[0] *= 0.96
+        self.vel[1] *= 0.96
+        self.pos[0] += self.vel[0]
+        self.pos[0] %= WIDTH
+        self.pos[1] += self.vel[1]
+        self.pos[1] %= HEIGHT
+        self.angle += self.angle_vel
+        if self.thrust:
+            ship_thrust_sound.play()
+        else:
+            ship_thrust_sound.rewind()
+        if self.thrust:
+            foward = angle_to_vector(self.angle)
+            self.vel[0] += foward[0] / 5
+            self.vel[1] += foward[1] / 5
+            
+    def shoot(self):
+        global a_missile
+        foward = angle_to_vector(self.angle)
+        tmppos = [self.pos[0] + 45 * foward[0], self.pos[1] + 45 * foward[1]]
+        tmpvel = [self.vel[0] + foward[0] * 3, self.vel[1] + foward[1] * 3]
+        a_missile = Sprite(tmppos, tmpvel, 0, 0, missile_image, missile_info, missile_sound)
+        missile_sound.play()
+
+
+
+# Sprite class
+class Sprite:
+    def __init__(self, pos, vel, ang, ang_vel, image, info, sound = None):
+        self.pos = [pos[0],pos[1]]
+        self.vel = [vel[0],vel[1]]
+        self.angle = ang
+        self.angle_vel = ang_vel
+        self.image = image
+        self.image_center = info.get_center()
+        self.image_size = info.get_size()
+        self.radius = info.get_radius()
+        self.lifespan = info.get_lifespan()
+        self.animated = info.get_animated()
+        self.age = 0
+        if sound:
+            sound.rewind()
+            sound.play()
+   
+    def draw(self, canvas):
+        canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)        
+    
+    def update(self):
+        self.pos[0] += self.vel[0]
+        self.pos[0] %= WIDTH
+        self.pos[1] += self.vel[1]
+        self.pos[1] %= HEIGHT
+        self.angle += self.angle_vel
+       
+
+           
+def draw(canvas):
+    global time
+    
+    # animiate background
+    time += 1
+    wtime = (time / 4) % WIDTH
+    center = debris_info.get_center()
+    size = debris_info.get_size()
+    canvas.draw_image(nebula_image, nebula_info.get_center(), nebula_info.get_size(), [WIDTH / 2, HEIGHT / 2], [WIDTH, HEIGHT])
+    canvas.draw_image(debris_image, center, size, (wtime - WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT))
+    canvas.draw_image(debris_image, center, size, (wtime + WIDTH / 2, HEIGHT / 2), (WIDTH, HEIGHT))
+
+    # draw ship and sprites
+    my_ship.draw(canvas)
+    a_rock.draw(canvas)
+    a_missile.draw(canvas)
+    
+    # update ship and sprites
+    my_ship.update()
+    a_rock.update()
+    a_missile.update()
+
+    # show the number of lives remaining and the score
+    canvas.draw_text('Lives : '+str(lives), (50, 50), 30, "White")
+    canvas.draw_text('Score : '+str(score), (650, 50), 30, "White")
+
+
+# timer handler that spawns a rock    
+def rock_spawner():
+    global a_rock
+    a_rock = Sprite([random.random() * WIDTH, random.random() * HEIGHT], [random.random(), random.random()], 
+                    random.random() * 2 * math.pi, random.random() * random.choice([0.1, -0.1]), 
+                    asteroid_image, asteroid_info)
+
+# keyboard handler
+def keydown(key):
+    if key == simplegui.KEY_MAP['left']:
+        my_ship.angle_vel = -0.1
+    elif key == simplegui.KEY_MAP['right']:
+        my_ship.angle_vel = 0.1
+    elif key == simplegui.KEY_MAP['up']:
+        my_ship.thrust = True
+    elif key == simplegui.KEY_MAP['space']:
+        my_ship.shoot()
+        
+def keyup(key):
+    if key == simplegui.KEY_MAP['left']:
+        my_ship.angle_vel = 0
+    elif key == simplegui.KEY_MAP['right']:
+        my_ship.angle_vel = 0
+    elif key == simplegui.KEY_MAP['up']:
+        my_ship.thrust = False
+
+
+# initialize frame
+frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
+frame.add_label('How to control the ship?')
+frame.add_label('- UP ARROW to accelerate')
+frame.add_label('- LEFT ARROW to rotate counter clockwise')
+frame.add_label('- RIGHT ARROW to rotate clockwise')
+frame.add_label('- SPACE to spawn a missile')
+
+# initialize ship and two sprites
+my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
+a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0, 0, asteroid_image, asteroid_info)
+a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info)
+
+# register handlers
+frame.set_draw_handler(draw)
+frame.set_keydown_handler(keydown)  
+frame.set_keyup_handler(keyup) 
+
+timer = simplegui.create_timer(1000.0, rock_spawner)
+
+# get things rolling
+timer.start()
+frame.start()
+
+
+```
