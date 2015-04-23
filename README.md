@@ -32,6 +32,6 @@ All projects presented here are from [Rice University online courses](https://ww
 - Mini-Project 7: [Word Wrangler](http://linzifan.github.io/python_courses/PoC-Project7)
 - Mini-Project 8: [Tic-Tac-Toe (Minimax)](http://linzifan.github.io/python_courses/PoC-Project8)
 - Mini-Project 9: [The Fifteen Puzzle](http://linzifan.github.io/python_courses/PoC-Project9)
-
+- Practice 4: [Solitaire Tantrix](http://linzifan.github.io/python_courses/PoC-Practice4)
 
 [Index](http://linzifan.github.io/python_courses/Index)
