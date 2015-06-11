@@ -35,4 +35,8 @@ All projects presented here are from [Rice University online courses](https://ww
 - Practice 4: [Nim (Tree search)](http://linzifan.github.io/python_courses/PoC-Practice4)
 - Practice 5: [Solitaire Tantrix](http://linzifan.github.io/python_courses/PoC-Practice5)
 
+#### Algorithmic Thinking
+- Module 1: [Graph Basics and Random Digraphs](http://linzifan.github.io/python_courses/AT-Module1)
+- 
+
 [Index](http://linzifan.github.io/python_courses/Index)
