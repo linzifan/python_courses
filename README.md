@@ -37,6 +37,7 @@ All projects presented here are from [Rice University online courses](https://ww
 
 #### Algorithmic Thinking
 - Module 1: [Graph Basics and Random Digraphs](http://linzifan.github.io/python_courses/AT-Module1)
-- 
+
+
 
 [Index](http://linzifan.github.io/python_courses/Index)
